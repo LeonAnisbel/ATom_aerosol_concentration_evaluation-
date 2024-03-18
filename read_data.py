@@ -49,8 +49,11 @@ def ds_atom_data_sel_filter():
 
     # selecting only atom levels under 1 km height
     ds_atom = ds_atom.where(ds_atom['alt'].compute() < height, drop='True')
-    ds_atom = ds_atom.where(ds_atom[at_var].compute() > 0., drop='True')
-
+    if at_var == 'OA_PM1_AMS':
+        # Constrain ATom OA_PM1_AMS to limits in remote regions as in Pai et al. 2020
+        ds_atom = ds_atom.where((ds_atom[at_var].compute() > 0.) & (ds_atom[at_var].compute() <= 0.2), drop='True')
+    else:
+        ds_atom = ds_atom.where(ds_atom[at_var].compute() > 0., drop='True')
     return ds_atom
 
 
