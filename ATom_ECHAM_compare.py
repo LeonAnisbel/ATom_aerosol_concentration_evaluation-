@@ -1,0 +1,30 @@
+# ### Authors: @Anisbel Leon & @Swetlana Paul
+
+import global_vars
+import plot_model_atom
+import read_data
+import utils_data_sel
+import utils_interp_func
+import utils_region_def
+import plot_atom_data
+
+#calculate and plot MOA/MOA+OC
+#read_data.read_model_moa_oa()
+#exit()
+ds_atom = read_data.ds_atom_data_sel_filter()
+
+# #### Defining and plotting regions
+reg_data = utils_region_def.get_region_dict(ds_atom)
+print(reg_data)
+plot_atom_data.plot_regions_map(reg_data)
+
+ds_echam_base, ds_ac3_arctic = read_data.read_model_data(ds_atom)
+
+
+ds_atom_vs_mod, mod_dicc_keys = utils_interp_func.get_model_ds_interp(ds_atom, ds_echam_base, ds_ac3_arctic)
+c_echam, c_atom, ds_atom_vs_daily = utils_data_sel.get_daily_nonull(ds_atom_vs_mod, mod_dicc_keys)
+plot_model_atom.plot_one_pannel(c_echam, c_atom, ds_atom_vs_daily)
+
+# ### Plotting and computing statistics per regions
+reg_model_atom = utils_region_def.get_region_dict_model_atom(ds_atom_vs_mod,mod_dicc_keys)
+plot_model_atom.plot_multipannel(reg_model_atom)

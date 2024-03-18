@@ -1,0 +1,13 @@
+This project reads ATom data and interpolates linearly ECHAM-HAM model grid to the location and height of ATom
+aircraft.
+
+--Run ATom_ECHAM_compare.py to execute all
+
+--global_vars.py contains all global variables
+- Directories to ATom and pressure levels ECHAM data
+- height_criteria as the top level to select the data. Near the surface marine aerosols have a greater influence
+- name of model variable to compare to ATom
+- ATom variable to compare
+
+-- region_cond.py contains the definition of the ocean regions used in the comparison
+
