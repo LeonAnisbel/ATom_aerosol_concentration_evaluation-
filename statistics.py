@@ -1,9 +1,10 @@
 import numpy as np
 import math
 import global_vars
+from sklearn.metrics import mean_squared_error
 
 
-def get_statistics(c_echam_txy, c_atom):
+def get_statistics(c_atom, c_echam_txy):
     units = global_vars.data_units
     num_timesteps = len(c_atom.time)
 
@@ -17,10 +18,13 @@ def get_statistics(c_echam_txy, c_atom):
 
     # model-observations
     # root mean square error btw. model and observations at station location
-    RMSE = float(math.sqrt(np.square(np.subtract(c_atom, c_echam_txy)).mean(skipna=True)))
+    MSE = mean_squared_error(c_atom, c_echam_txy)
+    RMSE = float(math.sqrt(MSE))
 
     # mean bias btw. model and observation at station location
     mean_bias = np.nanmean(np.subtract(c_echam_txy, c_atom))
+    # print(mean_bias, np.nanmean(c_echam_txy - c_atom))
+    # print(c_echam_txy, c_atom)
 
     # normalized mean biases btw. model and observations, at station locations
     normalized_mean_bias = np.nansum(np.subtract(c_echam_txy, c_atom)) / np.nansum(c_atom)

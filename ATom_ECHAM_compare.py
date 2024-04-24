@@ -15,7 +15,6 @@ ds_atom = read_data.ds_atom_data_sel_filter()
 
 # #### Defining and plotting regions
 reg_data = utils_region_def.get_region_dict(ds_atom)
-print(reg_data)
 plot_atom_data.plot_regions_map(reg_data)
 
 ds_echam_base, ds_ac3_arctic = read_data.read_model_data(ds_atom)

@@ -60,7 +60,7 @@ def define_ds(atom, echam, tt):
 def get_region_dict_model_atom(ds_atom_vs, new_keys):
     at_var = global_vars.atom_var
     ds_atom_vs_notnan = ds_atom_vs.where(ds_atom_vs[at_var].compute().notnull(), drop=True)
-    ds_atom_vs_notnan['time'] = ds_atom_vs_notnan.time.dt.ceil('12H')  # DDTHH:MM --> DD+1T00:00; alternatively, use floor(): DDTHH:MM --> DDT00:00
+    ds_atom_vs_notnan['time'] = ds_atom_vs_notnan.time.dt.ceil('1D')  # DDTHH:MM --> DD+1T00:00; alternatively, use floor(): DDTHH:MM --> DDT00:00
 
     lat = ds_atom_vs_notnan['lat'].compute()
     lon = ds_atom_vs_notnan['lon'].compute()
@@ -89,7 +89,7 @@ def get_region_dict_model_atom(ds_atom_vs, new_keys):
         print(ex)
         # sub_na = f'{global_vars.experiments[ex_id]}_{global_vars.height_criteria}'
         for i, na in enumerate(reg_data[ex].keys()):
-            sub_na = list(reg_data[ex].keys())
+            sub_na = list(reg_data[ex][na].keys())
             variables = [lat, lon, da_atom, da_model_dicc[ex], alt, pres, date]
             _, new_vars = find_region(variables,
                                       conditions[i],
