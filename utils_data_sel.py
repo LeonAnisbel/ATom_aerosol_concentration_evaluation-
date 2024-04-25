@@ -1,5 +1,8 @@
 import global_vars
-def get_daily_nonull(ds_atom_vs,new_keys):
+import region_cond
+import pandas as pd
+
+def get_daily_nonull(ds_atom_vs, new_keys):
     at_var = global_vars.atom_var
     # extract nan values from dataset
     ds_atom_vs_notnan = ds_atom_vs.where(ds_atom_vs[at_var].compute().notnull(), drop=True)
@@ -13,4 +16,27 @@ def get_daily_nonull(ds_atom_vs,new_keys):
     c_echam_txy_dicc = dict((name, ds_atom_vs_daily[name]) for name in new_keys)
     c_atom = ds_atom_vs_daily[at_var]
 
-    return c_echam_txy_dicc,c_atom,ds_atom_vs_daily
+    return c_echam_txy_dicc, c_atom, ds_atom_vs_daily
+
+def create_df(reg_data_stat):
+    reg_keys = list(region_cond.reg_data.keys())
+    exp_keys = list(reg_data_stat.keys())
+
+    reg_keys_2_dataframe = []
+    exp_keys_2_dataframe = []
+    vars_2_dataframe = [[], [], [], []]
+    for i in exp_keys:
+        for r in reg_keys:
+            exp_keys_2_dataframe.append(i)
+            reg_keys_2_dataframe.append(r)
+            for v_id, v in enumerate(reg_data_stat[i][r].keys()):
+                vars_2_dataframe[v_id].append(reg_data_stat[i][r][v])
+
+    da = {'Experiments':exp_keys_2_dataframe,
+            'Regions': reg_keys_2_dataframe,
+            'Pearson Coef.': vars_2_dataframe[0],
+            'Mean Bias': vars_2_dataframe[1],
+            'NMB': vars_2_dataframe[2],
+            'RMSE': vars_2_dataframe[3]}
+    df_data = pd.DataFrame(data=da)
+    df_data.to_pickle('./stat_exp_regions.pkl')

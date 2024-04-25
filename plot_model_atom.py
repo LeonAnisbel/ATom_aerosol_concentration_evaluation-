@@ -1,3 +1,4 @@
+import Taylor_diagram
 import global_vars
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
@@ -153,7 +154,16 @@ def plot_multipannel(reg_data):
     mo_var = global_vars.model_var
     units = global_vars.data_units
 
+    reg_data_4_taylor_obs = dict((name, {})
+                       for name in list(reg_data.keys()))
+    reg_data_4_taylor_mod = dict((name, {})
+                       for name in list(reg_data.keys()))
+    reg_data_stat = dict((name, {})
+                       for name in list(reg_data.keys()))
+    reg_data_4_taylor_mod_list = []
+
     for idx, ex in enumerate(reg_data.keys()):
+        print('plotting', ex)
         mo_var_title = mo_var[idx]
         if mo_var[idx] == 'OA':
             mo_var_title = 'MOA + OC'
@@ -164,6 +174,7 @@ def plot_multipannel(reg_data):
         fig_na = f'Daily concentration {units}'
         fig.suptitle(f'{fig_na}', fontsize='20')
         for i, na in enumerate(reg_data[ex].keys()):
+            reg_data_stat[ex][na] = {}
             print(na)
             print("_______________________________")
             # calculate daily means
@@ -180,14 +191,16 @@ def plot_multipannel(reg_data):
                         std_obs_list.append(reg_data[ex][na]['atom_data'][ti_idx].values)
 
                 std_daily_obs.append(np.nanstd(np.array(std_obs_list)))
-            print(ds_atom_vs_daily)
 
             ds_atom_vs_daily['std_daily_observ'] = (['time'], std_daily_obs)
-            ds_atom_vs_daily_filter = ds_atom_vs_daily.where(ds_atom_vs_daily['echam_data'] < 0.8, drop=True)
-            print(ds_atom_vs_daily_filter)
+            ds_atom_vs_daily_filter = ds_atom_vs_daily#.where(ds_atom_vs_daily['echam_data'] < 0.8, drop=True)
 
             c_echam_txy = ds_atom_vs_daily_filter['echam_data']
             c_atom = ds_atom_vs_daily_filter['atom_data']
+
+            reg_data_4_taylor_mod[ex][na] = c_echam_txy
+            reg_data_4_taylor_obs[ex][na] = c_atom
+
             print(ds_atom_vs_daily_filter['time'], '\n', c_echam_txy)
 
             print(ds_atom_vs_daily_filter['time'], '\n', c_atom)
@@ -195,6 +208,12 @@ def plot_multipannel(reg_data):
             std_model, std_obs, RMSE, mean_bias, normalized_mean_bias, pearsons_coeff, _ = statistics.get_statistics(
                 c_atom, c_echam_txy)
             stat = f'(RMSE: {RMSE:.2f}, bias:{mean_bias:.2f}, R: {pearsons_coeff:.2f})'
+
+            reg_data_stat[ex][na]['R'] = pearsons_coeff
+            reg_data_stat[ex][na]['bias'] = mean_bias
+            reg_data_stat[ex][na]['NMB'] = normalized_mean_bias
+            reg_data_stat[ex][na]['RMSE'] = RMSE
+
             plot_scatter_improve(axes[i],
                                  c_atom.values,
                                  c_echam_txy.values,
@@ -211,3 +230,7 @@ def plot_multipannel(reg_data):
 
         plt.tight_layout()
         plt.savefig(f'{global_vars.plot_dir}{ex}_{mo_var_title}_model_atom.png', dpi=300)
+        plt.close()
+
+    return reg_data_stat
+        # Taylor_diagram.taylor_diag(reg_data_4_taylor_obs, reg_data_4_taylor_mod)
