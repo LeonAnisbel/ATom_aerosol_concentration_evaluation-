@@ -51,7 +51,7 @@ def ds_atom_data_sel_filter():
     ds_atom = ds_atom.where(ds_atom['alt'].compute() < height, drop='True')
     if at_var == 'OA_PM1_AMS':
         # Constrain ATom OA_PM1_AMS to limits in remote regions as in Pai et al. 2020
-        ds_atom = ds_atom.where((ds_atom[at_var].compute() > 0.) & (ds_atom[at_var].compute() <= 0.2), drop='True')
+        ds_atom = ds_atom.where((ds_atom[at_var].compute() > 0.) & (ds_atom[at_var].compute() <= 0.2) , drop='True')#
     else:
         ds_atom = ds_atom.where(ds_atom[at_var].compute() > 0., drop='True')
     return ds_atom
@@ -63,25 +63,31 @@ def read_model_data(ds_atom):
     end_time_atom = end_time_atom + (end_time_atom - end_time_atom.astype('datetime64[M]'))
 
     mo_var = global_vars.model_var
-    exper =  global_vars.experiments
+    exper = global_vars.experiments
+    exper_id = global_vars.exp_id
+
     # Only time period of ATom-measurements and only selected variables are loaded in order to save memory.
     # read in all files in directory
 
-
+    dict_model_obs_data = {}
+    ds_ac3_arctic = []
     path_arctic = f'{global_vars.p_model}{exper[0]}/'
-    ds_ac3_arctic = xr.open_mfdataset(f'{path_arctic}*_{mo_var[0]}_plev.nc',
-                                      concat_dim='time',
-                                      combine='nested',
-                                      preprocess=lambda ds:
-                                      ds[[mo_var[0]]].sel(time=slice(start_time_atom, end_time_atom)))
+    for e_id, m_v in enumerate(mo_var[:-1]):
+        dict_model_obs_data[exper_id[e_id]] = xr.open_mfdataset(f'{path_arctic}*_{m_v}_plev.nc',
+                                                                concat_dim='time',
+                                                                combine='nested',
+                                                                preprocess=lambda ds:
+                                                                ds[[mo_var[e_id]]].sel(
+                                                                    time=slice(start_time_atom, end_time_atom)))
 
-    path_echam = f'{global_vars.p_model}{exper[1]}/'
-    ds_echam_base = xr.open_mfdataset(f'{path_echam}*_{mo_var[1]}_plev.nc',
-                                      concat_dim='time',
-                                      combine='nested',
-                                      preprocess=lambda ds:
-                                      ds[[mo_var[1]]].sel(time=slice(start_time_atom, end_time_atom)))
-    return ds_echam_base, ds_ac3_arctic
+    path_echam = f'{global_vars.p_model}{exper[-1]}/'
+    dict_model_obs_data[exper_id[-1]] = xr.open_mfdataset(f'{path_echam}*_{mo_var[-1]}_plev.nc',
+                                                          concat_dim='time',
+                                                          combine='nested',
+                                                          preprocess=lambda ds:
+                                                          ds[[mo_var[-1]]].sel(
+                                                              time=slice(start_time_atom, end_time_atom)))
+    return dict_model_obs_data
 
 
 def sel_time(C, month):
@@ -90,7 +96,7 @@ def sel_time(C, month):
 
 
 def read_model_moa_oa():
-    exper =  global_vars.experiments
+    exper = global_vars.experiments
 
     path_arctic = f'{global_vars.p_model}{exper[0]}/'
     ds_ac3_arctic = xr.open_mfdataset(f'{path_arctic}*_OA_plev.nc',
@@ -122,9 +128,9 @@ def read_model_moa_oa():
     ds_ac3_arctic_monthly = xr.concat(oa_list, dim='time')
     ds_ac3_arctic_moa_monthly = xr.concat(moa_list, dim='time')
 
-    ratio = ds_ac3_arctic_moa_monthly.rename({'MOA' : 'VAR'})/ds_ac3_arctic_monthly.rename({'OA': 'VAR'})
+    ratio = ds_ac3_arctic_moa_monthly.rename({'MOA': 'VAR'}) / ds_ac3_arctic_monthly.rename({'OA': 'VAR'})
 
-    print(ratio,'\n', ratio.min(),ratio.max())
+    print(ratio, '\n', ratio.min(), ratio.max())
 
     lon = ds_ac3_arctic.lon
     lat = ds_ac3_arctic.lat

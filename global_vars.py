@@ -6,8 +6,10 @@ path_atom_meta = f'{base_path}*.nc'
 
 height_criteria = 1000
 p_model = f'{p_main}my_experiments/'
-model_var = ['OA', 'OC']#['SS','SS']
-experiments = ['ac3_arctic', 'echam_base']  # ,
+model_var = ['OA', 'MOA', 'OC']#['SS','SS']
+experiments = ['ac3_arctic', 'ac3_arctic', 'echam_base']  # ,
+exp_id = ['ac3_arctic_OA', 'ac3_arctic_MOA', 'echam_base']  # ,
+
 atom_var = 'OA_PM1_AMS'#'SeaSaltMass_PALMS'#
 atom_plot_varna = 'OA'#'SS'##
 data_units = '${\mu}$g/m3'

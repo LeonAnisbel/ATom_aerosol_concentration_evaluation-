@@ -1,5 +1,5 @@
 import xarray as xr
-
+import numpy as np
 import global_vars
 import region_cond
 
@@ -77,6 +77,8 @@ def get_region_dict_model_atom(ds_atom_vs, new_keys):
     reg_data_ds = dict((name, {})
                        for name in list(da_model_dicc.keys()))
     # print('\n', reg_data)
+    # reg_data_np = dict((name, {})
+    #                    for name in list(da_model_dicc.keys()))
 
     conditions = region_cond.get_cond_list(lat, lon)
 
@@ -97,5 +99,7 @@ def get_region_dict_model_atom(ds_atom_vs, new_keys):
                                       sub_na)
 
             reg_data_ds[ex][na] = define_ds(new_vars[2].data, new_vars[3].data, new_vars[6].data)
+            # reg_data_np[ex][na]['atom_data'] = np.array(new_vars[2].data)
+            # reg_data_np[ex][na]['echam_data'] = np.array(new_vars[3].data)
 
-    return reg_data_ds
+    return reg_data_ds#, reg_data_np

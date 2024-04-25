@@ -19,8 +19,8 @@ def interpolation(ds, x, y, z):
     return int_val.values
 
 
-def get_model_ds_interp(ds_atom, ds_ecmabase, ds_ac3_arctic):
-    exp = global_vars.experiments
+def get_model_ds_interp(ds_atom, dict_model_obs_data):
+    exp = global_vars.exp_id
     mo_var = global_vars.model_var
 
     # Lists wit Coverted datetime to decimals
@@ -31,23 +31,23 @@ def get_model_ds_interp(ds_atom, ds_ecmabase, ds_ac3_arctic):
                        for m in ds_atom.time.values])
     dates_echam.append([datetime.strptime(str(m),
                                           '%Y-%m-%dT%H:%M:%S.000000000').timestamp()
-                        for m in ds_ecmabase.time.values])
+                        for m in dict_model_obs_data[exp[-1]].time.values])
 
-    ds_model_data = [ds_ac3_arctic]
+    ds_model_data = [dict_model_obs_data[exp[0]]]
     interp_model = [[]]  # initialize interp list
     if len(exp) > 1:
-        ds_model_data = [ds_ac3_arctic, ds_ecmabase]
-        interp_model = [[], []]  # initialize interp list
+        # ds_model_data = [ds_ac3_arctic[0], ds_ac3_arctic[1], ds_ecmabase]
+        interp_model = [[], [], []]  # initialize interp list
 
     # go through all date values from atom and interpolate the spatial grid
     # to the ECHAM-HAM suitable time. Note that ECHAM output is every 12h
     # and every datetime from atom between 00 and 12 h will be interpolated
     # to the same spatial ECHAM grid
-    for lidx, mo_exp in enumerate(ds_model_data):
+    for lidx, mo_exp in enumerate(list(dict_model_obs_data.keys())):
         print('interpolating experiment: ', exp[lidx])
         for i, idx in enumerate(dates_atom[0]):
             _, index = find_nearest(idx, dates_echam[0])
-            interp = interpolation(mo_exp.isel(time=index)[mo_var[lidx]],
+            interp = interpolation(dict_model_obs_data[mo_exp].isel(time=index)[mo_var[lidx]],
                                    ds_atom['lon'].values[i],
                                    ds_atom['lat'].values[i],
                                    ds_atom['P'].values[i])
@@ -57,7 +57,7 @@ def get_model_ds_interp(ds_atom, ds_ecmabase, ds_ac3_arctic):
 
     # create new dataset with the interpoalted variables
     dicc_keys = list(dict_model.keys())
-    new_keys = [f'{m}_var' for m in dicc_keys]
+    new_keys = [f'{m}_var' for m in exp]
 
     ds_inter = xr.Dataset({
         new_keys[0]: (
@@ -65,7 +65,7 @@ def get_model_ds_interp(ds_atom, ds_ecmabase, ds_ac3_arctic):
             dict_model[dicc_keys[0]]),
     },
         coords={"time": ds_atom.time.values}, )
-    ds_atom_vs = ds_atom.assign(ac3_arctic_var=ds_inter[new_keys[0]] * 1e9)
+    ds_atom_vs = ds_atom.assign(ac3_arctic_OA_var=ds_inter[new_keys[0]] * 1e9)
 
     if len(exp) > 1:
         ds_inter = xr.Dataset({
@@ -75,12 +75,16 @@ def get_model_ds_interp(ds_atom, ds_ecmabase, ds_ac3_arctic):
             new_keys[1]: (
                 "time",
                 dict_model[dicc_keys[1]]),
+            new_keys[2]: (
+                "time",
+                dict_model[dicc_keys[2]]),
             },
             coords={"time": ds_atom.time.values}, )
 
         OA_OC_ratio = 1.6
         # ds_atom_vs = ds_atom.assign(ac3_arctic_OA_BC_ratio=ds_inter[new_keys[0]]*OA_OC_ratio)
-        ds_atom_vs = ds_atom.assign(ac3_arctic_var=ds_inter[new_keys[0]] * 1e9,
-                                    echam_base_var=ds_inter[new_keys[1]] * 1e9)
+        ds_atom_vs = ds_atom.assign(ac3_arctic_OA_var=ds_inter[new_keys[0]] * 1e9,
+                                    ac3_arctic_MOA_var=ds_inter[new_keys[1]] * 1e9,
+                                    echam_base_var=ds_inter[new_keys[2]] * 1e9)
 
     return ds_atom_vs, new_keys
