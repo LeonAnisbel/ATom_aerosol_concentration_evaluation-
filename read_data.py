@@ -72,7 +72,7 @@ def read_model_data(ds_atom):
     dict_model_obs_data = {}
     ds_ac3_arctic = []
     path_arctic = f'{global_vars.p_model}{exper[0]}/'
-    for e_id, m_v in enumerate(mo_var[:-1]):
+    for e_id, m_v in enumerate(mo_var[:-2]):
         dict_model_obs_data[exper_id[e_id]] = xr.open_mfdataset(f'{path_arctic}*_{m_v}_plev.nc',
                                                                 concat_dim='time',
                                                                 combine='nested',
@@ -81,12 +81,18 @@ def read_model_data(ds_atom):
                                                                     time=slice(start_time_atom, end_time_atom)))
 
     path_echam = f'{global_vars.p_model}{exper[-1]}/'
-    dict_model_obs_data[exper_id[-1]] = xr.open_mfdataset(f'{path_echam}*_{mo_var[-1]}_plev.nc',
+    dict_model_obs_data[exper_id[-1]] = xr.open_mfdataset(f'{path_echam}*_{mo_var[-2]}_plev.nc',
                                                           concat_dim='time',
                                                           combine='nested',
                                                           preprocess=lambda ds:
-                                                          ds[[mo_var[-1]]].sel(
+                                                          ds[[mo_var[-2]]].sel(
                                                               time=slice(start_time_atom, end_time_atom)))
+
+    # ratio = (dict_model_obs_data[exper_id[1]][mo_var[1]] /
+    #          dict_model_obs_data[exper_id[0]][mo_var[0]])
+    # dict_model_obs_data['ratio_MOA_MOA_OC'] = ratio.to_dataset(name=mo_var[-1])
+    # print(dict_model_obs_data['ratio_MOA_MOA_OC'].max().values, dict_model_obs_data['ratio_MOA_MOA_OC'].min().values)
+
     return dict_model_obs_data
 
 

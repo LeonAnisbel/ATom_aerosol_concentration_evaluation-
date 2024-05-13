@@ -44,7 +44,7 @@ def get_model_ds_interp(ds_atom, dict_model_obs_data):
     # and every datetime from atom between 00 and 12 h will be interpolated
     # to the same spatial ECHAM grid
     for lidx, mo_exp in enumerate(list(dict_model_obs_data.keys())):
-        print('interpolating experiment: ', exp[lidx])
+        print('interpolating experiment: ', mo_exp)
         for i, idx in enumerate(dates_atom[0]):
             _, index = find_nearest(idx, dates_echam[0])
             interp = interpolation(dict_model_obs_data[mo_exp].isel(time=index)[mo_var[lidx]],
@@ -53,11 +53,11 @@ def get_model_ds_interp(ds_atom, dict_model_obs_data):
                                    ds_atom['P'].values[i])
             interp_model[lidx].append(float(interp))
 
-    dict_model = dict((name, da) for da, name in zip(interp_model, exp))
+    dict_model = dict((name, da) for da, name in zip(interp_model, list(dict_model_obs_data.keys())))
 
     # create new dataset with the interpoalted variables
     dicc_keys = list(dict_model.keys())
-    new_keys = [f'{m}_var' for m in exp]
+    new_keys = [f'{m}_var' for m in list(dict_model_obs_data.keys())]
 
     ds_inter = xr.Dataset({
         new_keys[0]: (
@@ -78,6 +78,9 @@ def get_model_ds_interp(ds_atom, dict_model_obs_data):
             new_keys[2]: (
                 "time",
                 dict_model[dicc_keys[2]]),
+            # new_keys[3]: (
+            # "time",
+            # dict_model[dicc_keys[3]]),
             },
             coords={"time": ds_atom.time.values}, )
 
@@ -85,6 +88,7 @@ def get_model_ds_interp(ds_atom, dict_model_obs_data):
         # ds_atom_vs = ds_atom.assign(ac3_arctic_OA_BC_ratio=ds_inter[new_keys[0]]*OA_OC_ratio)
         ds_atom_vs = ds_atom.assign(ac3_arctic_OA_var=ds_inter[new_keys[0]] * 1e9,
                                     ac3_arctic_MOA_var=ds_inter[new_keys[1]] * 1e9,
-                                    echam_base_var=ds_inter[new_keys[2]] * 1e9)
+                                    echam_base_var=ds_inter[new_keys[2]] * 1e9,)
+                                    # ratio_MOA_MOA_OC_var=ds_inter[new_keys[3]]
 
     return ds_atom_vs, new_keys

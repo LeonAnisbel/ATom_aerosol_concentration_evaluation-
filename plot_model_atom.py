@@ -133,17 +133,17 @@ def plot_one_pannel(c_echam, c_atom, ds_atom_vs_daily):
             mo_var_title = 'MOA + OC'
         c_echam_txy = c_echam[na]
         diff_plot(c_echam_txy, c_atom, ds_atom_vs_daily, na)
-        std_model, std_obs, RMSE, mean_bias, normalized_mean_bias, pearsons_coeff, statistical_quantities = (
+        std_model, std_obs, RMSE, mean_bias, normalized_mean_bias, pearsons_coeff, R2, statistical_quantities = (
             statistics.get_statistics(
-            c_atom,c_echam_txy))
+            c_atom, c_echam_txy))
         scatter_plot(c_atom, c_atom, statistical_quantities, na)
 
         stat = f'(RMSE: {RMSE:.2f}, bias:{mean_bias:.2f}, R: {pearsons_coeff:.2f})'
         fig, ax = plt.subplots(1, 1, figsize=(8, 6))
-        fig_na = f'Daily concentration {units}'
+        fig_na = f'Daily concentration'
         plot_scatter_improve(ax, c_atom, c_echam_txy, fr'$\bf{fig_na}$' + f'\n{stat}', std_obs)
-        ax.set_ylabel(f'Model {mo_var_title}', fontsize='16')
-        ax.set_xlabel(f'ATom {at_var}', fontsize='16')
+        ax.set_ylabel(f'Model {mo_var_title} ({units})', fontsize='16')
+        ax.set_xlabel(f'ATom {at_var}'+ '(${\mu}$g s/m3)', fontsize='16')
         plt.tight_layout()
 
         plt.savefig(f'{global_vars.plot_dir}{na}_{mo_var_title}_global_single_plot.png', dpi=300)
@@ -154,15 +154,11 @@ def plot_multipannel(reg_data):
     mo_var = global_vars.model_var
     units = global_vars.data_units
 
-    reg_data_4_taylor_obs = dict((name, {})
-                       for name in list(reg_data.keys()))
-    reg_data_4_taylor_mod = dict((name, {})
-                       for name in list(reg_data.keys()))
     reg_data_stat = dict((name, {})
                        for name in list(reg_data.keys()))
     reg_data_4_taylor_mod_list = []
 
-    for idx, ex in enumerate(reg_data.keys()):
+    for idx, ex in enumerate(list(reg_data.keys())):
         print('plotting', ex)
         mo_var_title = mo_var[idx]
         if mo_var[idx] == 'OA':
@@ -171,7 +167,7 @@ def plot_multipannel(reg_data):
         plt.close()
         fig, ax = plt.subplots(2, 3, figsize=(15, 10))
         axes = ax.flatten()
-        fig_na = f'Daily concentration {units}'
+        fig_na = f'Daily concentration'
         fig.suptitle(f'{fig_na}', fontsize='20')
         for i, na in enumerate(reg_data[ex].keys()):
             reg_data_stat[ex][na] = {}
@@ -198,14 +194,12 @@ def plot_multipannel(reg_data):
             c_echam_txy = ds_atom_vs_daily_filter['echam_data']
             c_atom = ds_atom_vs_daily_filter['atom_data']
 
-            reg_data_4_taylor_mod[ex][na] = c_echam_txy
-            reg_data_4_taylor_obs[ex][na] = c_atom
 
             print(ds_atom_vs_daily_filter['time'], '\n', c_echam_txy)
 
             print(ds_atom_vs_daily_filter['time'], '\n', c_atom)
 
-            std_model, std_obs, RMSE, mean_bias, normalized_mean_bias, pearsons_coeff, _ = statistics.get_statistics(
+            std_model, std_obs, RMSE, mean_bias, normalized_mean_bias, pearsons_coeff, R2, _ = statistics.get_statistics(
                 c_atom, c_echam_txy)
             stat = f'(RMSE: {RMSE:.2f}, bias:{mean_bias:.2f}, R: {pearsons_coeff:.2f})'
 
@@ -213,6 +207,7 @@ def plot_multipannel(reg_data):
             reg_data_stat[ex][na]['bias'] = mean_bias
             reg_data_stat[ex][na]['NMB'] = normalized_mean_bias
             reg_data_stat[ex][na]['RMSE'] = RMSE
+            reg_data_stat[ex][na]['R2'] = R2
 
             plot_scatter_improve(axes[i],
                                  c_atom.values,

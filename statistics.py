@@ -2,6 +2,7 @@ import numpy as np
 import math
 import global_vars
 from sklearn.metrics import mean_squared_error
+from sklearn.metrics import r2_score
 
 
 def get_statistics(c_atom, c_echam_txy):
@@ -62,7 +63,9 @@ def get_statistics(c_atom, c_echam_txy):
         ["Pearson's correlation coefficient (btw. model and observations, at station location)", pearsons_coeff, ''],
         ['index of agreement (btw. model and observations, at station location)', ioa, '']]
 
+    # Coefficient of Determination-R2 score
+    r2 = r2_score(c_atom, c_echam_txy)
     # for statistical_quantity in statistical_quantities:
     #     print(f'{statistical_quantity[0]} = {statistical_quantity[1]:.2f} {statistical_quantity[2]}\n')
 
-    return std_model, std_obs, RMSE, mean_bias, normalized_mean_bias, pearsons_coeff, statistical_quantities
+    return std_model, std_obs, RMSE, mean_bias, normalized_mean_bias, pearsons_coeff, r2, statistical_quantities

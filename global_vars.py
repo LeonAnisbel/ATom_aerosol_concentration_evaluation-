@@ -6,7 +6,7 @@ path_atom_meta = f'{base_path}*.nc'
 
 height_criteria = 1000
 p_model = f'{p_main}my_experiments/'
-model_var = ['OA', 'MOA', 'OC']#['SS','SS']
+model_var = ['OA', 'MOA', 'OC', 'ratio_MOA_MOA_OC']#['SS','SS']
 experiments = ['ac3_arctic', 'ac3_arctic', 'echam_base']  # ,
 exp_id = ['ac3_arctic_OA', 'ac3_arctic_MOA', 'echam_base']  # ,
 

@@ -2,6 +2,7 @@ import xarray as xr
 import numpy as np
 import global_vars
 import region_cond
+import pandas as pd
 
 
 # ### Defining regions
@@ -60,7 +61,8 @@ def define_ds(atom, echam, tt):
 def get_region_dict_model_atom(ds_atom_vs, new_keys):
     at_var = global_vars.atom_var
     ds_atom_vs_notnan = ds_atom_vs.where(ds_atom_vs[at_var].compute().notnull(), drop=True)
-    ds_atom_vs_notnan['time'] = ds_atom_vs_notnan.time.dt.ceil('1D')  # DDTHH:MM --> DD+1T00:00; alternatively, use floor(): DDTHH:MM --> DDT00:00
+    ds_atom_vs_notnan['time'] = ds_atom_vs_notnan.time.dt.ceil(
+        '1D')  # DDTHH:MM --> DD+1T00:00; alternatively, use floor(): DDTHH:MM --> DDT00:00
 
     lat = ds_atom_vs_notnan['lat'].compute()
     lon = ds_atom_vs_notnan['lon'].compute()
@@ -73,7 +75,6 @@ def get_region_dict_model_atom(ds_atom_vs, new_keys):
     reg_data = dict((name, region_cond.reg_data)
                     for name in list(da_model_dicc.keys()))
 
-
     reg_data_ds = dict((name, {})
                        for name in list(da_model_dicc.keys()))
     # print('\n', reg_data)
@@ -82,13 +83,14 @@ def get_region_dict_model_atom(ds_atom_vs, new_keys):
 
     conditions = region_cond.get_cond_list(lat, lon)
 
-    for ex in reg_data.keys():
+    for ex in list(reg_data.keys()):
         for na in reg_data[ex].keys():
             reg_data[ex][na] = region_cond.subkeys
     #         reg_data_ds[ex][na] = region_cond.subkeys
 
     for ex_id, ex in enumerate(list(da_model_dicc.keys())):
         print(ex)
+        tot_lon, tot_lat = [], []
         # sub_na = f'{global_vars.experiments[ex_id]}_{global_vars.height_criteria}'
         for i, na in enumerate(reg_data[ex].keys()):
             sub_na = list(reg_data[ex][na].keys())
@@ -98,8 +100,27 @@ def get_region_dict_model_atom(ds_atom_vs, new_keys):
                                       reg_data[ex][na],
                                       sub_na)
 
+            # if ex == 'ratio_MOA_MOA_OC':
+            #     tot_lat.append(new_vars[0].data)
+            #     tot_lon.append(new_vars[1].data)
+            #     tot_ratio.append(new_vars[3].data)
+            # else:
             reg_data_ds[ex][na] = define_ds(new_vars[2].data, new_vars[3].data, new_vars[6].data)
-            # reg_data_np[ex][na]['atom_data'] = np.array(new_vars[2].data)
-            # reg_data_np[ex][na]['echam_data'] = np.array(new_vars[3].data)
+            for ll in range(len(new_vars[0].data)):
+                tot_lat.append(new_vars[0].data[ll])
+                tot_lon.append(new_vars[1].data[ll])
 
-    return reg_data_ds#, reg_data_np
+    tot_ratio = []
+    for i, na in enumerate(reg_data[new_keys[0]].keys()):
+        ratio = (reg_data_ds[new_keys[1]][na]['echam_data'] /
+                 reg_data_ds[new_keys[0]][na]['echam_data'])
+        for ll in ratio:
+            tot_ratio.append(ll.values)
+
+    print(tot_ratio)
+    da_df = {"moa_oc_ratio": tot_ratio,
+             "lat": tot_lat, "lon": tot_lon}
+    ds_ratio = pd.DataFrame(data=da_df)
+    ds_ratio.to_pickle('./moa_moa_oc_ratio.pkl')
+
+    return reg_data_ds

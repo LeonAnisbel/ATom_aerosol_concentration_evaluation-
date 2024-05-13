@@ -24,7 +24,7 @@ def create_df(reg_data_stat):
 
     reg_keys_2_dataframe = []
     exp_keys_2_dataframe = []
-    vars_2_dataframe = [[], [], [], []]
+    vars_2_dataframe = [[], [], [], [], []]
     for i in exp_keys:
         for r in reg_keys:
             exp_keys_2_dataframe.append(i)
@@ -37,6 +37,8 @@ def create_df(reg_data_stat):
             'Pearson Coef.': vars_2_dataframe[0],
             'Mean Bias': vars_2_dataframe[1],
             'NMB': vars_2_dataframe[2],
-            'RMSE': vars_2_dataframe[3]}
+            'RMSE': vars_2_dataframe[3],
+            'R2': vars_2_dataframe[4]}
     df_data = pd.DataFrame(data=da)
+
     df_data.to_pickle('./stat_exp_regions.pkl')
