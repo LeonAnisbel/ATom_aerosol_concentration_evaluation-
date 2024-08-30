@@ -51,7 +51,7 @@ def ds_atom_data_sel_filter():
     ds_atom = ds_atom.where(ds_atom['alt'].compute() < height, drop='True')
     if at_var == 'OA_PM1_AMS':
         # Constrain ATom OA_PM1_AMS to limits in remote regions as in Pai et al. 2020
-        ds_atom = ds_atom.where((ds_atom[at_var].compute() > 0.) & (ds_atom[at_var].compute() <= 0.2) , drop='True')#
+        ds_atom = ds_atom.where((ds_atom[at_var].compute() > 0.) & (ds_atom[at_var].compute() <= 0.2), drop='True')
     else:
         ds_atom = ds_atom.where(ds_atom[at_var].compute() > 0., drop='True')
     return ds_atom
@@ -92,7 +92,7 @@ def read_model_data(ds_atom):
     #          dict_model_obs_data[exper_id[0]][mo_var[0]])
     # dict_model_obs_data['ratio_MOA_MOA_OC'] = ratio.to_dataset(name=mo_var[-1])
     # print(dict_model_obs_data['ratio_MOA_MOA_OC'].max().values, dict_model_obs_data['ratio_MOA_MOA_OC'].min().values)
-
+    print(len(dict_model_obs_data))
     return dict_model_obs_data
 
 

@@ -75,20 +75,16 @@ def get_model_ds_interp(ds_atom, dict_model_obs_data):
             new_keys[1]: (
                 "time",
                 dict_model[dicc_keys[1]]),
-            new_keys[2]: (
-                "time",
-                dict_model[dicc_keys[2]]),
             # new_keys[3]: (
             # "time",
             # dict_model[dicc_keys[3]]),
             },
             coords={"time": ds_atom.time.values}, )
 
-        OA_OC_ratio = 1.6
-        # ds_atom_vs = ds_atom.assign(ac3_arctic_OA_BC_ratio=ds_inter[new_keys[0]]*OA_OC_ratio)
         ds_atom_vs = ds_atom.assign(ac3_arctic_OA_var=ds_inter[new_keys[0]] * 1e9,
-                                    ac3_arctic_MOA_var=ds_inter[new_keys[1]] * 1e9,
-                                    echam_base_var=ds_inter[new_keys[2]] * 1e9,)
+                                    echam_base_var=ds_inter[new_keys[1]] * 1e9,)
                                     # ratio_MOA_MOA_OC_var=ds_inter[new_keys[3]]
+        #ds_atom_vs = ds_atom_vs.where(ds_atom_vs['ac3_arctic_OA_var'] < 0.2, drop=True)
+        #ds_atom_vs = ds_atom_vs.where(ds_atom_vs['echam_base_var'] < 0.2, drop=True)
 
     return ds_atom_vs, new_keys

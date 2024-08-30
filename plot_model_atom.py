@@ -115,7 +115,7 @@ def plot_scatter_improve(axs, atom, model, title, std_obs):
         np.min([axs.get_xlim(), axs.get_ylim()]),  # min of both axes
         np.max([axs.get_xlim(), axs.get_ylim()]),  # max of both axes
     ]
-    axs.plot(lims, lims, 'k--', alpha=0.75, zorder=0, label='1:1 line')
+    # axs.plot(lims, lims, 'k--', alpha=0.75, zorder=0, label='1:1 line')
     axs.legend()
     axs.grid(linewidth=0.5)
     axs.tick_params(axis='both', labelsize='14')
@@ -162,19 +162,19 @@ def plot_multipannel(reg_data):
         print('plotting', ex)
         mo_var_title = mo_var[idx]
         if mo_var[idx] == 'OA':
-            mo_var_title = 'MOA + OC'
+            mo_var_title = 'PMOA + OC'
 
         plt.close()
         fig, ax = plt.subplots(2, 3, figsize=(15, 10))
         axes = ax.flatten()
         fig_na = f'Daily concentration'
-        fig.suptitle(f'{fig_na}', fontsize='20')
+        # fig.suptitle(f'{fig_na}', fontsize='20')
         for i, na in enumerate(reg_data[ex].keys()):
             reg_data_stat[ex][na] = {}
             print(na)
             print("_______________________________")
             # calculate daily means
-            # reg_data[ex][na]['time'] = reg_data[ex][na].time.dt.ceil('1D')
+            reg_data[ex][na]['time'] = reg_data[ex][na].time.dt.ceil('1D')
             ds_atom_vs_daily = reg_data[ex][na].groupby('time').mean(skipna=True)
 
             #daily std for observations
@@ -201,13 +201,15 @@ def plot_multipannel(reg_data):
 
             std_model, std_obs, RMSE, mean_bias, normalized_mean_bias, pearsons_coeff, R2, _ = statistics.get_statistics(
                 c_atom, c_echam_txy)
-            stat = f'(RMSE: {RMSE:.2f}, bias:{mean_bias:.2f}, R: {pearsons_coeff:.2f})'
+            stat = f'(RMSE: {RMSE:.2f}, MB:{mean_bias:.2f}, R: {pearsons_coeff:.2f})'
 
             reg_data_stat[ex][na]['R'] = pearsons_coeff
             reg_data_stat[ex][na]['bias'] = mean_bias
             reg_data_stat[ex][na]['NMB'] = normalized_mean_bias
             reg_data_stat[ex][na]['RMSE'] = RMSE
             reg_data_stat[ex][na]['R2'] = R2
+            reg_data_stat[ex][na]['model_vals'] = c_echam_txy.values
+            reg_data_stat[ex][na]['atom_vals'] = c_atom.values
 
             plot_scatter_improve(axes[i],
                                  c_atom.values,
@@ -215,17 +217,32 @@ def plot_multipannel(reg_data):
                                  fr'$\bf{na}$' + f'\n{stat}',
                                  ds_atom_vs_daily_filter['std_daily_observ'])
 
-        axes[0].set_ylabel(f'Model {mo_var_title}', fontsize='16')
-        axes[3].set_ylabel(f'Model {mo_var_title}', fontsize='16')
+        ylab = f'Model {mo_var_title} ({global_vars.unit_atom})'
+        xlab = f'Observation {at_var} ({global_vars.unit_atom})'
+        axes[0].set_ylabel(ylab, fontsize='16')
+        axes[3].set_ylabel(ylab, fontsize='16')
 
-        axes[3].set_xlabel(f'ATom {at_var}', fontsize='16')
-        axes[4].set_xlabel(f'ATom {at_var}', fontsize='16')
-        axes[5].set_xlabel(f'ATom {at_var}', fontsize='16')
+        axes[3].set_xlabel(xlab, fontsize='16')
+        axes[4].set_xlabel(xlab, fontsize='16')
+        axes[5].set_xlabel(xlab, fontsize='16')
         # axes[7].set_xlabel(f'ATom {at_var}', fontsize='16')
 
         plt.tight_layout()
-        plt.savefig(f'{global_vars.plot_dir}{ex}_{mo_var_title}_model_atom.png', dpi=300)
+        plt.savefig(f'{global_vars.plot_dir}{ex}_{mo_var_title}_model_atom_final.png', dpi=300)
         plt.close()
 
     return reg_data_stat
-        # Taylor_diagram.taylor_diag(reg_data_4_taylor_obs, reg_data_4_taylor_mod)
+
+
+def plot_vert_profile(alt, atom, model, ex, na_region):
+    fig, ax = plt.subplots(1, 1, figsize=(8, 6))
+    ax.scatter(atom, alt, color='blue', label='ATom OA')
+    ax.scatter(model, alt, color='red', label='Model')
+    ax.legend()
+    ax.set_ylim([0, 1000])
+    ax.set_ylabel('Altitude (m)')
+    ax.set_xlabel('Concentration ($\mu gs m^{-3}$)')
+    plt.savefig(f'{global_vars.plot_dir}{ex}_{na_region}_vert_profile.png', dpi=300)
+
+
+

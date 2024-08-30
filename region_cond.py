@@ -7,12 +7,14 @@
 #             'Sub. Pacific': [],
 #             'Sub. Atlantic': [], }
 
-reg_data = {'N. Pole': [],
+reg_data = {'S. Atlantic':[],
+            'S. Pacific':[],
+            'C. Pacific':[],
             'N. Pacific': [],
             'N. Atlantic':[],
-           'S. Pacific':[],
-           'S. Atlantic':[],
-           'C. Pacific':[]}
+            'N. Pole': [],
+           
+           }
 
 subkeys = {'latitud': [],
            'longitud': [],
@@ -31,10 +33,89 @@ def get_cond_list(lat,lon):
     #               [[lat, 23, 55], [lon, 300, 360]],
     #               [[lat, -23, 23], [lon, 130, 290]],
     #               [[lat, -23, 23], [lon, 300, 360]]]
-    conditions = [[[lat, 63, 90]],
+    conditions = [[[lat, -90, 0], [lon, 290, 360]],
+                  [[lat, -90, -23], [lon, 130, 290]],
+                  [[lat, -23, 23], [lon, 130, 290]],
                   [[lat, 23, 63], [lon, 130, 240]],
                   [[lat, 0, 63], [lon, 300, 360]],
-                  [[lat, -85, -23], [lon, 130, 290]],
-                  [[lat, -85, 0], [lon, 290, 360]],
-                  [[lat, -23, 23], [lon, 130, 290]]]
+                  [[lat, 63, 90]],
+             ]
     return conditions
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
