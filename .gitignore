@@ -1,0 +1,6 @@
+.idea/
+__pycache__
+plots
+*pdf
+*png
+*pkl*
