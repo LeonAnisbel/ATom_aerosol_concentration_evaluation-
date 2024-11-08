@@ -93,7 +93,9 @@ def scatter_plot(c_echam_txy, c_atom, statistical_quantities, exp):
 def plot_scatter_improve(axs, atom, model, title, std_obs):
     axs.errorbar(atom, model, xerr=std_obs, fmt='o', color="grey", alpha=0.8)
     axs.scatter(atom, model, color='blue')
-    axs.set_title(title, fontsize='16')
+    axs.set_title(title[0], fontsize='16', loc='right')
+    axs.set_title(title[1], fontsize='16', loc='left')
+
     linreg_coeffs = np.polynomial.Polynomial.fit(atom, model,
                                                  deg=1).convert().coef  # perform linear regression, get intercept and slope
     x = np.linspace(atom.min(), atom.max(), num=2)  # define x-values of regression line
@@ -153,6 +155,9 @@ def plot_multipannel(reg_data):
     at_var = global_vars.atom_plot_varna
     mo_var = global_vars.model_var
     units = global_vars.data_units
+    fig_idx = [r'$\bf{(a)}$', r'$\bf{(b)}$',
+            r'$\bf{(c)}$', r'$\bf{(d)}$',
+            r'$\bf{(e)}$', r'$\bf{(f)}$']
 
     reg_data_stat = dict((name, {})
                        for name in list(reg_data.keys()))
@@ -214,7 +219,7 @@ def plot_multipannel(reg_data):
             plot_scatter_improve(axes[i],
                                  c_atom.values,
                                  c_echam_txy.values,
-                                 fr'$\bf{na}$' + f'\n{stat}',
+                                 [fr'$\bf{na}$'  +  f'\n{stat}', fig_idx[i]+'\n  '],
                                  ds_atom_vs_daily_filter['std_daily_observ'])
 
         ylab = f'Model {mo_var_title} ({global_vars.unit_atom})'
