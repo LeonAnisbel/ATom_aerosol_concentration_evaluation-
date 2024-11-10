@@ -142,8 +142,8 @@ def plot_one_pannel(c_echam, c_atom, ds_atom_vs_daily):
 
         stat = f'(RMSE: {RMSE:.2f}, bias:{mean_bias:.2f}, R: {pearsons_coeff:.2f})'
         fig, ax = plt.subplots(1, 1, figsize=(8, 6))
-        fig_na = f'Daily concentration'
-        plot_scatter_improve(ax, c_atom, c_echam_txy, fr'$\bf{fig_na}$' + f'\n{stat}', std_obs)
+        fig_na = f'Daily concentration \n'
+        plot_scatter_improve(ax, c_atom, c_echam_txy, [[fig_na],[stat]], std_obs)
         ax.set_ylabel(f'Model {mo_var_title} ({units})', fontsize='16')
         ax.set_xlabel(f'ATom {at_var}'+ '(${\mu}$g s/m3)', fontsize='16')
         plt.tight_layout()

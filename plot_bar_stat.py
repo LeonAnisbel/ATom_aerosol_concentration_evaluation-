@@ -67,7 +67,7 @@ if __name__ == '__main__':
     data["Model variables"] = new_var_na
 
     # plot_multiplot(data, data_ratio)
-    print(data)
+    print(data.iloc[:,:5])
     fig, ax = plt.subplots(3, 1, figsize=(14, 10))
     axs = ax.flatten()
     color = sns.color_palette("Paired")
