@@ -32,7 +32,8 @@ def create_df(reg_data_stat):
 
     reg_keys_2_dataframe = []
     exp_keys_2_dataframe = []
-    vars_2_dataframe = [[], [], [], [], [], [], []]
+
+    vars_2_dataframe = [[] for i in range(10)]
     for i in exp_keys:
         for r in reg_keys:
             exp_keys_2_dataframe.append(i)
@@ -47,9 +48,10 @@ def create_df(reg_data_stat):
             'Mean Bias': vars_2_dataframe[1],
             'NMB': vars_2_dataframe[2],
             'RMSE': vars_2_dataframe[3],
-            # 'R2': vars_2_dataframe[4],
-            'model_vals': vars_2_dataframe[5],
-            'atom_vals': vars_2_dataframe[6]
+            'pval': vars_2_dataframe[4],
+            'R2': vars_2_dataframe[5],
+            'model_vals': vars_2_dataframe[6],
+            'atom_vals': vars_2_dataframe[7]
           }
     df_data = pd.DataFrame(data=da)
     df_data.to_pickle(file_name)

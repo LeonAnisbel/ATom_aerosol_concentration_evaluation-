@@ -135,15 +135,15 @@ def plot_one_pannel(c_echam, c_atom, ds_atom_vs_daily):
             mo_var_title = 'MOA + OC'
         c_echam_txy = c_echam[na]
         diff_plot(c_echam_txy, c_atom, ds_atom_vs_daily, na)
-        std_model, std_obs, RMSE, mean_bias, normalized_mean_bias, pearsons_coeff, R2, statistical_quantities = (
+        std_model, std_obs, RMSE, mean_bias, normalized_mean_bias, pearsons_coeff, pval, R2, statistical_quantities = (
             statistics.get_statistics(
             c_atom, c_echam_txy))
         scatter_plot(c_atom, c_atom, statistical_quantities, na)
 
-        stat = f'(RMSE: {RMSE:.2f}, bias:{mean_bias:.2f}, R: {pearsons_coeff:.2f})'
+        stat = f'[RMSE: {RMSE:.2f}, pval:{pval:.2f}, \n bias:{mean_bias:.2f}, R: {pearsons_coeff:.2f}]'
         fig, ax = plt.subplots(1, 1, figsize=(8, 6))
-        fig_na = f'Daily concentration \n'
-        plot_scatter_improve(ax, c_atom, c_echam_txy, [[fig_na],[stat]], std_obs)
+        fig_na = f'Daily concentration \n \n'
+        plot_scatter_improve(ax, c_atom, c_echam_txy, [fig_na,stat], std_obs)
         ax.set_ylabel(f'Model {mo_var_title} ({units})', fontsize='16')
         ax.set_xlabel(f'ATom {at_var}'+ '(${\mu}$g s/m3)', fontsize='16')
         plt.tight_layout()
@@ -204,14 +204,15 @@ def plot_multipannel(reg_data):
 
             print(ds_atom_vs_daily_filter['time'], '\n', c_atom)
 
-            std_model, std_obs, RMSE, mean_bias, normalized_mean_bias, pearsons_coeff, R2, _ = statistics.get_statistics(
+            std_model, std_obs, RMSE, mean_bias, normalized_mean_bias, pearsons_coeff, pval, R2, _ = statistics.get_statistics(
                 c_atom, c_echam_txy)
-            stat = f'(RMSE: {RMSE:.2f}, MB:{mean_bias:.2f}, R: {pearsons_coeff:.2f})'
+            stat = f'[RMSE: {RMSE:.2f}, pval: {pval:.3f}, \n MB:{mean_bias:.2f}, R: {pearsons_coeff:.2f}]'
 
             reg_data_stat[ex][na]['R'] = pearsons_coeff
             reg_data_stat[ex][na]['bias'] = mean_bias
             reg_data_stat[ex][na]['NMB'] = normalized_mean_bias
             reg_data_stat[ex][na]['RMSE'] = RMSE
+            reg_data_stat[ex][na]['pval'] = pval
             reg_data_stat[ex][na]['R2'] = R2
             reg_data_stat[ex][na]['model_vals'] = c_echam_txy.values
             reg_data_stat[ex][na]['atom_vals'] = c_atom.values
@@ -219,7 +220,7 @@ def plot_multipannel(reg_data):
             plot_scatter_improve(axes[i],
                                  c_atom.values,
                                  c_echam_txy.values,
-                                 [fr'$\bf{na}$'  +  f'\n{stat}', fig_idx[i]+'\n  '],
+                                 [fr'$\bf{na}$ \n'  +  f'\n{stat}', fig_idx[i]+'\n  '],
                                  ds_atom_vs_daily_filter['std_daily_observ'])
 
         ylab = f'Model {mo_var_title} ({global_vars.unit_atom})'
