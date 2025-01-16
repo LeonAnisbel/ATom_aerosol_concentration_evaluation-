@@ -52,18 +52,44 @@ def each_panel_fig(ax, data, var_na, lims, tick_space, title):
     return pl
 
 
+def scatter_plot(data_new, ax, parameter, title):
+    color_reg = ['y', 'r', 'lightgreen', 'g', 'm', 'k']
+    sns.scatterplot(data=data_new, x="Observation", y="Model", hue=" ", style=" ", palette=color_reg, ax = ax)
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+    ax.set_ylim((10 ** -3, 10 ** 0))
+    ax.set_xlim((10 ** -3, 10 ** 0))
+    plt.xlabel('Observation OA (${\mu}$g m$^{-3}$)')
+    plt.ylabel('Model PMOA + OC (${\mu}$g m$^{-3}$)')
+
+    k = 10
+    ax.loglog([10 ** -3, 10 ** 0], [10 ** -3, 10 ** 0], color="black", linestyle="-", alpha=0.5, linewidth=0.5)
+    ax.loglog([10 ** -3 , 10 ** 0], [10 ** -3*k, 10 ** 0 * k], color="black", linestyle=":", alpha =0.5)
+    ax.loglog([10 ** -3, 10 ** 0 ], [10 ** -3/k, 10 ** 0 / k], color="black", linestyle=":", alpha=0.5)
+
+    ax.set_title(title)
+    ax.text(0.95, 0.01, parameter,
+            verticalalignment='bottom', horizontalalignment='right',
+            transform=ax.transAxes,
+            color='k', fontsize=15)
+
+
 if __name__ == '__main__':
     data = pd.read_pickle('stat_exp_regions.pkl')
     data_ratio = pd.read_pickle('moa_moa_oc_ratio.pkl')
 
+    experiments = ['echam_base_var', 'ac3_arctic_OA_var']
+    parameters = ['RMSE: 0.1 \n NMB: 0.00 \n R: 0.35',
+                  'RMSE: 0.15 \n NMB: 0.00 \n R: 0.46']
+    experiments_names = ["SPMOAoff (OC)", "SPMOAon (PMOA+OC)"]
     new_var_na = []
     for i in data["Experiments"].values:
-        if i == 'ac3_arctic_OA_var':
-            new_var_na.append("SPMOAon (PMOA+OC)")
+        if i == experiments[1]:
+            new_var_na.append(experiments_names[1])
         if i == 'ac3_arctic_MOA_var':
             new_var_na.append("PMOA")
-        if i == 'echam_base_var':
-            new_var_na.append("SPMOAoff (OC)")
+        if i == experiments[0]:
+            new_var_na.append(experiments_names[0])
     data["Model variables"] = new_var_na
 
     # plot_multiplot(data, data_ratio)
@@ -83,7 +109,29 @@ if __name__ == '__main__':
         axs.tick_params(axis='both', labelsize='18')
         axs.yaxis.get_label().set_fontsize(18)
         axs.xaxis.get_label().set_fontsize(18)
-
     #fig.tight_layout()
     plt.savefig(f'plots/Stat_regions_bar.png', dpi=300)
     plt.close()
+
+
+    fig, ax = plt.subplots(2, 1, figsize=(6, 12))
+    ax.flatten()
+
+    for i, exp in enumerate(experiments):
+        data_exp = data[data['Experiments']== exp]
+        region_names = []
+        model = []
+        observation  = []
+        for region in data_exp['Regions']:
+            data_exp_region = data_exp[data_exp['Regions']==region]
+            for obs, mod in zip(data_exp_region["atom_vals"].values[0], data_exp_region["model_vals"].values[0]):
+                region_names.append(region)
+                observation.append(obs)
+                model.append(mod)
+        data_new = pd.DataFrame(data={' ':region_names, 'Model':model, 'Observation':observation})
+        scatter_plot(data_new, ax[i], parameters[i], experiments_names[i])
+    fig.tight_layout()
+    plt.show()
+    plt.savefig(f'plots/scatter_regions.png', dpi=300)
+
+
