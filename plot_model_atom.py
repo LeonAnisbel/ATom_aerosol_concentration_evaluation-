@@ -140,7 +140,7 @@ def plot_one_pannel(c_echam, c_atom, ds_atom_vs_daily):
             c_atom, c_echam_txy))
         scatter_plot(c_atom, c_atom, statistical_quantities, na)
 
-        stat = f'[RMSE: {RMSE:.2f}, pval:{pval:.2f}, \n bias:{mean_bias:.2f}, R: {pearsons_coeff:.2f}]'
+        stat = f'[RMSE: {RMSE:.2f}, pval:{pval:.2f}, \n NMB:{normalized_mean_bias:.2f}, R: {pearsons_coeff:.2f}]'
         fig, ax = plt.subplots(1, 1, figsize=(8, 6))
         fig_na = f'Daily concentration \n \n'
         plot_scatter_improve(ax, c_atom, c_echam_txy, [fig_na,stat], std_obs)
@@ -206,7 +206,7 @@ def plot_multipannel(reg_data):
 
             std_model, std_obs, RMSE, mean_bias, normalized_mean_bias, pearsons_coeff, pval, R2, _ = statistics.get_statistics(
                 c_atom, c_echam_txy)
-            stat = f'[RMSE: {RMSE:.2f}, pval: {pval:.3f}, \n MB:{mean_bias:.2f}, R: {pearsons_coeff:.2f}]'
+            stat = f'[RMSE: {RMSE:.2f}, pval: {pval:.3f}, \n NMB:{normalized_mean_bias:.2f}, R: {pearsons_coeff:.2f}]'
 
             reg_data_stat[ex][na]['R'] = pearsons_coeff
             reg_data_stat[ex][na]['bias'] = mean_bias
