@@ -7,6 +7,7 @@ import matplotlib.colors as mcolors
 import matplotlib.ticker as ticker
 
 import global_vars
+import statistics_atom
 
 font = 12
 def plot_multiplot(da_stat, da_map):
@@ -72,7 +73,7 @@ def each_panel_fig(ax, data, var_na, lims, tick_space, title, top_pannel=False):
             ax.bar_label(c, labels=lab, padding=3)  # rotation=90 if needed
             ax.margins(y=0.1)
 
-    for bars, hatch, legend_handle in zip(ax.containers, ['////', '----'], pl.legend_.legendHandles):
+    for bars, hatch, legend_handle in zip(ax.containers, ['////', '----'], pl.legend_.legend_handles):
         for bar, color in zip(bars, palette):
             bar.set_facecolor(color)
             bar.set_hatch(hatch)
@@ -86,7 +87,7 @@ def each_panel_fig(ax, data, var_na, lims, tick_space, title, top_pannel=False):
         ax.set(xlabel=None)
         ax.set_xticklabels([])
     ax.set_title(title,
-                 loc='right',
+                 loc='left',
                  fontsize=font)
     ax.set_ylim(lims)
     ax.yaxis.set_major_locator(ticker.MultipleLocator(tick_space))
@@ -124,8 +125,9 @@ def scatter_plot(data_new, ax, parameter, title, var, right_panel=False):
                          ax = ax)
     ax.set_yscale('log')
     ax.set_xscale('log')
-    ax.set_ylim((10 ** -3, 10 ** 0))
-    ax.set_xlim((10 ** -3, 10 ** 0))
+    yli_min = 10 ** -5
+    ax.set_ylim((yli_min, 10 ** 0))
+    ax.set_xlim((yli_min, 10 ** 0))
     ax.set_xlabel('Observation OA (${\mu}$g m$^{-3}$)',
                   fontsize=font)
     ax.set_ylabel(f'Model {var} ' +  '(${\mu}$g m$^{-3}$)',
@@ -133,23 +135,23 @@ def scatter_plot(data_new, ax, parameter, title, var, right_panel=False):
 
     k = 10
     set_log_ax(ax,
-               [10 ** -3, 10 ** 0],
-               [10 ** -3, 10 ** 0],
+               [yli_min, 10 ** 0],
+               [yli_min, 10 ** 0],
               "-",)
     set_log_ax(ax,
-               [10 ** -3 , 10 ** 0],
-               [10 ** -3*k, 10 ** 0 * k],
+               [yli_min , 10 ** 0],
+               [yli_min*k, 10 ** 0 * k],
            ":")
     set_log_ax(ax,
-              [10 ** -3, 10 ** 0] ,
-              [10 ** -3/k, 10 ** 0 / k],
+              [yli_min, 10 ** 0] ,
+              [yli_min/k, 10 ** 0 / k],
                 ":")
 
     ax.set_title(f'{title[0]} ({var})',
-                 loc='center',
+                 loc='right',
                  fontsize=font)
     ax.set_title(title[1],
-                 loc='right',
+                 loc='left',
                  fontsize=font)
     ax.tick_params(axis='both',
                    labelsize=font)
@@ -160,8 +162,11 @@ def scatter_plot(data_new, ax, parameter, title, var, right_panel=False):
             horizontalalignment='left',
             transform=ax.transAxes,
             color='k',
-            fontsize=font)
+            fontsize=font-2)
     ax.legend_.remove()
+
+    ax.grid(linestyle='--',
+            linewidth=0.4)
 
     return pl
 
@@ -172,24 +177,54 @@ if __name__ == '__main__':
     data_ratio = pd.read_pickle('moa_moa_oc_ratio.pkl')
 
     experiments = ['echam_base_var', 'ac3_arctic_OA_var']
-    parameters = ['RMSE: 0.1 \n NMB: 0.01 \n R: 0.35',
-                  'RMSE: 0.15 \n NMB: 0.93 \n R: 0.46']
+#    parameters = ['RMSE: 0.1 \n NMB: 0.01 \n R: 0.35',
+ #                 'RMSE: 0.15 \n NMB: 0.93 \n R: 0.46']
     experiments_names = ["SPMOAoff", "SPMOAon"]
+
+
+    new_var_na = []
+    for i in data["Experiments"].values:
+        if i == experiments[0]:
+            new_var_na.append(experiments_names[0])
+        if i == 'ac3_arctic_MOA_var':
+            new_var_na.append("PMOA")
+        if i == experiments[1]:
+            new_var_na.append(experiments_names[1])
+    data["Model variables"] = new_var_na
+    color = sns.color_palette("Paired")
+    data = data.rename(columns={'RMSE':f'RMSE\n({global_vars.unit_atom})'})
+    print(data)
+    data_south_reg = data[(data['Regions'] == 'South Atlantic') |
+                          (data['Regions'] == 'South Pacific') |
+                          (data['Regions'] == 'Central Pacific') ]
+    #data_test = data[data['Regions'] == 'N. Pole']
+    #for j, k, l in zip(data_test['model_vals'].to_list()[0], data_test['model_vals'].to_list()[1], data_test['atom_vals'].to_list()[0]):
+     #   print(j)
+      #  if j>k:
+       #     print('True')
+        #else:
+         #   print('False', k, j, l)
+    data_off = data_south_reg[data_south_reg["Model variables"]==experiments_names[0]]
+    data_on = data_south_reg[data_south_reg["Model variables"]==experiments_names[1]]
+    data_total = pd.concat([data_off, data_on])
+
+
 ######################################################################
 # Create scatter and barplot together
-    fig = plt.figure(layout='constrained',
-                     figsize=(12, 6))
-    subfigs = fig.subfigures(1, 2,
-                             wspace=0.03,
-                             width_ratios=[2, 1])
-    axsLeft = subfigs[0].subplots(1, 2)
-
+#     fig = plt.figure(layout='constrained',
+#                      figsize=(12, 6))
+#     subfigs = fig.subfigures(1, 2,
+#                              wspace=0.03,
+#                              width_ratios=[2, 1])
+    # axsLeft = subfigs[0].subplots(1, 2)
+    fig, axsLeft = plt.subplots(1,2, figsize=(9, 5))
+    subfigs = [fig]
 # Scatter plots for both experiments
     indices = [r'$\bf{(a)}$', r'$\bf{(b)}$']
     var = ['OC', 'PMOA+OC']
     left_panel_list= [False, True]
     for i, exp in enumerate(experiments):
-        data_exp = data[data['Experiments']== exp]
+        data_exp = data_total[data_total['Experiments']== exp]
         region_names = []
         model = []
         observation  = []
@@ -202,12 +237,23 @@ if __name__ == '__main__':
         data_new = pd.DataFrame(data={' ':region_names,
                                       'Model':model,
                                       'Observation':observation})
+
+        _, _, RMSE, mean_bias, NMB, pearsons_coeff, pval_corr,_, res_lin_reg = (
+            statistics_atom.get_statistics(np.array(observation), np.array(model)))
+        parameters = (f' y = {np.round(res_lin_reg.slope, 2)}x'
+                      f'{format(res_lin_reg.intercept, '.3f')}\n'
+                      f' R: {np.round(pearsons_coeff, 2)} \n \n'
+                      
+                      f' RMSE: {np.round(RMSE, 2)} \n '
+                      f'MB: {np.round(mean_bias, 2)} \n '
+                      f'NMB: {np.round(NMB, 2)} \n ')
+
         pl_sct = scatter_plot(data_new,
-                              axsLeft[i],
-                              parameters[i],
-                              [experiments_names[i], indices[i]],
-                              var[i],
-                              right_panel = left_panel_list[i])
+                  axsLeft[i],
+                  parameters,
+                  [experiments_names[i], indices[i]],
+                  var[i],
+                  right_panel = left_panel_list[i])
 
     x = [0, 0.05]
     for i, ax in enumerate(axsLeft):
@@ -219,25 +265,9 @@ if __name__ == '__main__':
                        #bbox_to_anchor=(0.1, 0.1),
                        loc='lower center',
                        fontsize=font)
-
+    plt.savefig(f'plots/scatter_bar_plot_regions.png', dpi=300)
 # Bar plot of statistical parameters only for southern regions
-    new_var_na = []
-    for i in data["Experiments"].values:
-        if i == experiments[0]:
-            new_var_na.append(experiments_names[0])
-        if i == 'ac3_arctic_MOA_var':
-            new_var_na.append("PMOA")
-        if i == experiments[1]:
-            new_var_na.append(experiments_names[1])
-    data["Model variables"] = new_var_na
-    color = sns.color_palette("Paired")
-    data = data.rename(columns={'RMSE':f'RMSE\n({global_vars.unit_atom})'})
-    data_south_reg = data[(data['Regions'] == 'S. Atlantic') |
-                          (data['Regions'] == 'S. Pacific') |
-                          (data['Regions'] == 'C. Pacific')]
-    data_off = data_south_reg[data_south_reg["Model variables"]==experiments_names[0]]
-    data_on = data_south_reg[data_south_reg["Model variables"]==experiments_names[1]]
-    data_total = pd.concat([data_off, data_on])
+    exit()
 
     axsRight = subfigs[1].subplots(3, 1, sharex=True)
     pl = each_panel_fig(axsRight[0],
@@ -263,4 +293,3 @@ if __name__ == '__main__':
         setbox_pos(ax, 0)
 
     # plt.show()
-    plt.savefig(f'plots/scatter_bar_plot_regions.png', dpi=300)

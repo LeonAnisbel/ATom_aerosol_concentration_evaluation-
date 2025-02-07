@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import numpy as np
 
-import statistics
+import statistics_atom
 
 
 def diff_plot(c_echam_txy, c_atom, ds_atom_vs_daily, na):
