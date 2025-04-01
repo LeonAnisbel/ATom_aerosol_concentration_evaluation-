@@ -56,6 +56,6 @@ def get_statistics(c_atom, c_echam_txy):
         ['index of agreement (btw. model and observations, at station location)', ioa, ''],
     ['pval', pval_corr, ''],]
 
-    print(mean_bias, RMSE, normalized_mean_bias, pearsons_coeff, pval_corr)
+    # print(mean_bias, RMSE, normalized_mean_bias, pearsons_coeff, pval_corr)
 
     return std_model, std_obs, RMSE, mean_bias, normalized_mean_bias, pearsons_coeff, pval_corr, r2, res_lin_reg

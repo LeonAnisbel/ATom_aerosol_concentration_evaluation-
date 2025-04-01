@@ -115,7 +115,7 @@ def setbox_pos(axs, x):
                          box.width, box.height * 0.9])
 
 def scatter_plot(data_new, ax, parameter, title, var, right_panel=False):
-    color_reg = ['y', 'r', 'lightgreen', 'g', 'm', 'k']
+    color_reg = ['y', 'r', 'lightgreen'] #, 'g', 'm', 'k'
     pl = sns.scatterplot(data=data_new,
                          x="Observation",
                          y="Model",
@@ -170,7 +170,52 @@ def scatter_plot(data_new, ax, parameter, title, var, right_panel=False):
 
     return pl
 
+def create_scatter_plots(axsLeft, data_total, experiments):
+    indices = [r'$\bf{(a)}$', r'$\bf{(b)}$']
+    var = ['OC', 'PMOA+OC']
+    left_panel_list = [False, True]
+    for i, exp in enumerate(experiments):
+        data_exp = data_total[data_total['Experiments'] == exp]
+        region_names = []
+        model = []
+        observation = []
+        for region in data_exp['Regions']:
+            data_exp_region = data_exp[data_exp['Regions'] == region]
+            for obs, mod in zip(data_exp_region["atom_vals"].values[0], data_exp_region["model_vals"].values[0]):
+                region_names.append(region)
+                observation.append(obs)
+                model.append(mod)
+        data_new = pd.DataFrame(data={' ': region_names,
+                                      'Model': model,
+                                      'Observation': observation})
 
+        _, _, RMSE, mean_bias, NMB, pearsons_coeff, pval_corr, _, res_lin_reg = (
+            statistics_atom.get_statistics(np.array(observation), np.array(model)))
+        parameters = (f' y = {np.round(res_lin_reg.slope, 2)}x'
+                      f'{format(res_lin_reg.intercept, '.3f')}\n'
+                      f' R: {np.round(pearsons_coeff, 2)} \n \n'
+
+                      f' RMSE: {np.round(RMSE, 2)} \n '
+                      f'MB: {np.round(mean_bias, 2)} \n '
+                      f'NMB: {np.round(NMB, 2)} \n ')
+
+        pl_sct = scatter_plot(data_new,
+                              axsLeft[i],
+                              parameters,
+                              [experiments_names[i], indices[i]],
+                              var[i],
+                              right_panel=left_panel_list[i])
+
+    x = [0, 0.05]
+    for i, ax in enumerate(axsLeft):
+        setbox_pos(ax, x[i])
+    handles, labels = pl_sct.get_legend_handles_labels()
+    subfigs[0].legend(handles=handles,
+                      labels=labels,
+                      ncol=3,
+                      # bbox_to_anchor=(0.1, 0.1),
+                      loc='lower center',
+                      fontsize=font)
 
 if __name__ == '__main__':
     data = pd.read_pickle('stat_exp_regions.pkl')
@@ -192,91 +237,47 @@ if __name__ == '__main__':
             new_var_na.append(experiments_names[1])
     data["Model variables"] = new_var_na
     color = sns.color_palette("Paired")
-    data = data.rename(columns={'RMSE':f'RMSE\n({global_vars.unit_atom})'})
-    print(data)
+    data = data.rename(columns={'RMSE':f'RMSE\n({global_vars.unit_atom})',
+                                'Mean Bias':f'MB\n({global_vars.unit_atom})'})
     data_south_reg = data[(data['Regions'] == 'South Atlantic') |
                           (data['Regions'] == 'South Pacific') |
                           (data['Regions'] == 'Central Pacific') ]
-    #data_test = data[data['Regions'] == 'N. Pole']
-    #for j, k, l in zip(data_test['model_vals'].to_list()[0], data_test['model_vals'].to_list()[1], data_test['atom_vals'].to_list()[0]):
-     #   print(j)
-      #  if j>k:
-       #     print('True')
-        #else:
-         #   print('False', k, j, l)
+
     data_off = data_south_reg[data_south_reg["Model variables"]==experiments_names[0]]
     data_on = data_south_reg[data_south_reg["Model variables"]==experiments_names[1]]
     data_total = pd.concat([data_off, data_on])
 
 
 ######################################################################
-# Create scatter and barplot together
-#     fig = plt.figure(layout='constrained',
-#                      figsize=(12, 6))
-#     subfigs = fig.subfigures(1, 2,
-#                              wspace=0.03,
-#                              width_ratios=[2, 1])
-    # axsLeft = subfigs[0].subplots(1, 2)
     fig, axsLeft = plt.subplots(1,2, figsize=(9, 5))
     subfigs = [fig]
-# Scatter plots for both experiments
-    indices = [r'$\bf{(a)}$', r'$\bf{(b)}$']
-    var = ['OC', 'PMOA+OC']
-    left_panel_list= [False, True]
-    for i, exp in enumerate(experiments):
-        data_exp = data_total[data_total['Experiments']== exp]
-        region_names = []
-        model = []
-        observation  = []
-        for region in data_exp['Regions']:
-            data_exp_region = data_exp[data_exp['Regions']==region]
-            for obs, mod in zip(data_exp_region["atom_vals"].values[0], data_exp_region["model_vals"].values[0]):
-                region_names.append(region)
-                observation.append(obs)
-                model.append(mod)
-        data_new = pd.DataFrame(data={' ':region_names,
-                                      'Model':model,
-                                      'Observation':observation})
-
-        _, _, RMSE, mean_bias, NMB, pearsons_coeff, pval_corr,_, res_lin_reg = (
-            statistics_atom.get_statistics(np.array(observation), np.array(model)))
-        parameters = (f' y = {np.round(res_lin_reg.slope, 2)}x'
-                      f'{format(res_lin_reg.intercept, '.3f')}\n'
-                      f' R: {np.round(pearsons_coeff, 2)} \n \n'
-                      
-                      f' RMSE: {np.round(RMSE, 2)} \n '
-                      f'MB: {np.round(mean_bias, 2)} \n '
-                      f'NMB: {np.round(NMB, 2)} \n ')
-
-        pl_sct = scatter_plot(data_new,
-                  axsLeft[i],
-                  parameters,
-                  [experiments_names[i], indices[i]],
-                  var[i],
-                  right_panel = left_panel_list[i])
-
-    x = [0, 0.05]
-    for i, ax in enumerate(axsLeft):
-        setbox_pos(ax, x[i])
-    handles, labels = pl_sct.get_legend_handles_labels()
-    subfigs[0].legend(handles=handles,
-                       labels= labels,
-                       ncol=3,
-                       #bbox_to_anchor=(0.1, 0.1),
-                       loc='lower center',
-                       fontsize=font)
+    create_scatter_plots(axsLeft, data_total, experiments) # Scatter plots for both experiments
     plt.savefig(f'plots/scatter_bar_plot_regions.png', dpi=300)
-# Bar plot of statistical parameters only for southern regions
-    exit()
+    plt.close()
 
-    axsRight = subfigs[1].subplots(3, 1, sharex=True)
+    # Create scatter and barplot together
+    fig = plt.figure(layout='constrained',
+                     figsize=(12, 6))
+    subfigs = fig.subfigures(1, 2,
+                             wspace=0.038,
+                             width_ratios=[2, 1])
+    axsLeft = subfigs[0].subplots(1, 2)
+    create_scatter_plots(axsLeft, data_total, experiments) # Scatter plots for both experiments
+
+    axsRight = subfigs[1].subplots(3, 1, sharex=True) # Bar plot of statistical parameters only for southern regions
+    # pl = each_panel_fig(axsRight[0],
+    #                     data_total,
+    #                     'Pearson Coef.',
+    #                     [-0.1, 1],
+    #                     0.3,
+    #                     r'$\bf{(c)}$',
+    #                    top_pannel=True)
     pl = each_panel_fig(axsRight[0],
                         data_total,
-                        'Pearson Coef.',
-                        [-0.1, 1],
-                        0.3,
-                        r'$\bf{(c)}$',
-                       top_pannel=True)
+                        'MB\n(${\mu}$g m$^{-3}$)',
+                        [-0.1, 0.1],
+                        0.05,
+                        r'$\bf{(c)}$')
     _ = each_panel_fig(axsRight[1],
                         data_total,
                         'NMB',
@@ -292,4 +293,4 @@ if __name__ == '__main__':
     for ax in axsRight:
         setbox_pos(ax, 0)
 
-    # plt.show()
+    plt.show()
