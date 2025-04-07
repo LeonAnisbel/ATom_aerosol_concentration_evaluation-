@@ -6,6 +6,7 @@ from sklearn.metrics import r2_score
 from scipy.stats import linregress
 
 def get_statistics(c_atom, c_echam_txy):
+    """Function to compute statistics"""
     units = global_vars.data_units
 
     # model

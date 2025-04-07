@@ -5,6 +5,10 @@ from datetime import datetime
 
 
 def plot_flight_heights():
+    """
+    Plot ATom Flight heights for each campaign and vertical distribution of data
+    :return:
+    """
     colors = ['r', 'b', 'g', 'm']
     names = ['ATom-1', 'ATom-2', 'ATom-3', 'ATom-4']
     at_var = global_vars.atom_var
@@ -48,6 +52,7 @@ def plot_flight_heights():
 
 
 def plot_regions_map(reg_data):
+    """Plots the old region definition"""
     color_reg = ['y', 'r', 'lightgreen', 'g', 'm', 'k', 'b', 'orange']
 
     fig, ax = plt.subplots(1, 1, figsize=(9, 8),

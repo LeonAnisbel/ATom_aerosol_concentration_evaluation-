@@ -4,8 +4,8 @@ import xarray as xr
 import numpy as np
 
 # #### Interpolating values onto ECHAM grid
-# find the closest date and return the index
 def find_nearest(atom_val, echam_list):
+    """find the closest date and return the index """
     diff = []
     for i in echam_list:
         diff.append(i - atom_val)
@@ -15,11 +15,19 @@ def find_nearest(atom_val, echam_list):
 
 # interpolates a variable to lat,lon and plev (x,y,z) using cubic method
 def interpolation(ds, x, y, z):
+    """Performs linear interpolation and returns interpolated value"""
     int_val = ds.interp(lon=x, lat=y, plev=z, method="linear")
     return int_val.values
 
 
 def get_model_ds_interp(ds_atom, dict_model_obs_data):
+    """
+    Interpolate model values to observation location and dates for every experiment
+    :param ds_atom:
+    :param dict_model_obs_data:
+    :return: ds_atom_vs: dataframe with interpolated values per experiment,
+             new_keys: experiment names
+    """
     exp = global_vars.exp_id
     mo_var = global_vars.model_var
 
@@ -36,7 +44,6 @@ def get_model_ds_interp(ds_atom, dict_model_obs_data):
     ds_model_data = [dict_model_obs_data[exp[0]]]
     interp_model = [[]]  # initialize interp list
     if len(exp) > 1:
-        # ds_model_data = [ds_ac3_arctic[0], ds_ac3_arctic[1], ds_ecmabase]
         interp_model = [[], [], []]  # initialize interp list
 
     # go through all date values from atom and interpolate the spatial grid
@@ -75,16 +82,11 @@ def get_model_ds_interp(ds_atom, dict_model_obs_data):
             new_keys[1]: (
                 "time",
                 dict_model[dicc_keys[1]]),
-            # new_keys[3]: (
-            # "time",
-            # dict_model[dicc_keys[3]]),
             },
             coords={"time": ds_atom.time.values}, )
 
         ds_atom_vs = ds_atom.assign(ac3_arctic_OA_var=ds_inter[new_keys[0]] * 1e9,
                                     echam_base_var=ds_inter[new_keys[1]] * 1e9,)
-                                    # ratio_MOA_MOA_OC_var=ds_inter[new_keys[3]]
-        #ds_atom_vs = ds_atom_vs.where(ds_atom_vs['ac3_arctic_OA_var'] < 0.2, drop=True)
-        #ds_atom_vs = ds_atom_vs.where(ds_atom_vs['echam_base_var'] < 0.2, drop=True)
+
 
     return ds_atom_vs, new_keys

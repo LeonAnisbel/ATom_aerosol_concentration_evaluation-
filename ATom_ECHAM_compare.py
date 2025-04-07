@@ -6,9 +6,6 @@ import utils_interp_func
 import utils_region_def
 import plot_atom_data
 
-#calculate and plot MOA/MOA+OC
-#read_data.read_model_moa_oa()
-#exit()
 ds_atom = read_data.ds_atom_data_sel_filter()
 
 # #### Defining and plotting regions
@@ -19,7 +16,6 @@ dict_model_obs_data = read_data.read_model_data(ds_atom)
 
 
 ds_atom_vs_mod, mod_dicc_keys = utils_interp_func.get_model_ds_interp(ds_atom, dict_model_obs_data)
-print(ds_atom_vs_mod, mod_dicc_keys)
 c_echam, c_atom, ds_atom_vs_daily = utils_data_sel.get_daily_nonull(ds_atom_vs_mod, mod_dicc_keys)
 plot_model_atom.plot_one_pannel(c_echam, c_atom, ds_atom_vs_daily)
 

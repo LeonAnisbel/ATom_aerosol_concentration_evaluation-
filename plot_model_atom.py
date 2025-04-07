@@ -1,4 +1,6 @@
 #import Taylor_diagram
+import statistics
+
 import global_vars
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs

@@ -5,6 +5,13 @@ import region_cond
 import pandas as pd
 
 def get_daily_nonull(ds_atom_vs, new_keys):
+    """
+    Calculate daily average for observations
+    :param ds_atom_vs:
+    :param new_keys:
+    :return: dictionary, observation values, daily average dataframe
+    """
+
     at_var = global_vars.atom_var
     # extract nan values from dataset
     ds_atom_vs_notnan = ds_atom_vs.where(ds_atom_vs[at_var].compute().notnull(), drop=True)
@@ -21,6 +28,9 @@ def get_daily_nonull(ds_atom_vs, new_keys):
     return c_echam_txy_dicc, c_atom, ds_atom_vs_daily
 
 def create_df(reg_data_stat):
+    """
+    Create pickle file to save the statistical indices, model and observation values
+    """
     file_name = './stat_exp_regions.pkl'
     try:
         os.remove(file_name)

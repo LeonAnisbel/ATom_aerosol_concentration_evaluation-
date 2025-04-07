@@ -8,6 +8,9 @@ import pandas as pd
 # ### Defining regions
 
 def find_region(var_set, cond, dicc, sub_na):
+    """ This function is used to select and filter certain regions according to the conditions variable (cond).
+    var_set is the list of variables, dicc is the dictionary containing the regions of key argument sub_na
+    Returns the dictionary variable (dicc) with the data filtered to meet each condition"""
     variables = []
     for i, v in enumerate(var_set):
         if len(cond) <= 1:
@@ -27,6 +30,10 @@ def find_region(var_set, cond, dicc, sub_na):
 
 
 def get_region_dict(ds_atom):
+    """
+    :param ds_atom: ATom data
+    :return: Dictionary after region classification
+    """
     lat = ds_atom['lat'].compute()
     lon = ds_atom['lon'].compute()
     data = ds_atom['SeaSaltMass_PALMS'].compute()
@@ -51,6 +58,7 @@ def get_region_dict(ds_atom):
 
 
 def define_ds(atom, echam, tt):
+    """Defines a dataset"""
     ds = xr.Dataset(
         {"echam_data": ("time", echam),
          "atom_data": ("time", atom)},
@@ -59,10 +67,11 @@ def define_ds(atom, echam, tt):
 
 
 def get_region_dict_model_atom(ds_atom_vs, new_keys):
+    """This function creates and returns a dictionary with both ATom and Model values grouped per regions"""
     at_var = global_vars.atom_var
     ds_atom_vs_notnan = ds_atom_vs.where(ds_atom_vs[at_var].compute().notnull(), drop=True)
     ds_atom_vs_notnan['time'] = ds_atom_vs_notnan.time.dt.ceil(
-        '1D')  # DDTHH:MM --> DD+1T00:00; alternatively, use floor(): DDTHH:MM --> DDT00:00
+        '1D')
 
     lat = ds_atom_vs_notnan['lat'].compute()
     lon = ds_atom_vs_notnan['lon'].compute()
@@ -77,9 +86,6 @@ def get_region_dict_model_atom(ds_atom_vs, new_keys):
 
     reg_data_ds = dict((name, {})
                        for name in list(da_model_dicc.keys()))
-    # print('\n', reg_data)
-    # reg_data_np = dict((name, {})
-    #                    for name in list(da_model_dicc.keys()))
 
     conditions = region_cond.get_cond_list(lat, lon)
 
@@ -99,12 +105,6 @@ def get_region_dict_model_atom(ds_atom_vs, new_keys):
                                       conditions[i],
                                       reg_data[ex][na],
                                       sub_na)
-
-            # if ex == 'ratio_MOA_MOA_OC':
-            #     tot_lat.append(new_vars[0].data)
-            #     tot_lon.append(new_vars[1].data)
-            #     tot_ratio.append(new_vars[3].data)
-            # else:
             reg_data_ds[ex][na] = define_ds(new_vars[2].data, new_vars[3].data, new_vars[6].data)
             for ll in range(len(new_vars[0].data)):
                 tot_lat.append(new_vars[0].data[ll])

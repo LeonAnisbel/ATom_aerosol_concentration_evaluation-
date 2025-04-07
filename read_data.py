@@ -5,6 +5,8 @@ import plot_model
 
 
 def read_atom_data(path_atom_meta):
+    """ This function reads in the ATom in situ aircraft data from netcdf files
+    Returns: all relevant variables needed from the dataset"""
     ds_atom_palms = xr.open_mfdataset(path_atom_meta,
                                       group='PALMS-PartType-Mass',
                                       concat_dim='time',
@@ -35,6 +37,11 @@ def read_atom_data(path_atom_meta):
 
 
 def ds_atom_data_sel_filter():
+    """
+    Selecting only atom levels under 1 km height and concentrations smaller than 0.2 ug/m3
+    :return: dataframe with filtered ATom data
+    """
+
     at_var = global_vars.atom_var
     height = global_vars.height_criteria
     ds_atom_c, ds_atom_meta, ds_atom_time, ds_atom_meta_p = read_atom_data(global_vars.path_atom_meta)
@@ -58,6 +65,10 @@ def ds_atom_data_sel_filter():
 
 
 def read_model_data(ds_atom):
+    """
+    Reading model data for each experiment, only loads the time steps where ATom data exists
+    :return: dataframe with model data
+    """
     start_time_atom = ds_atom['time'].values[0]
     end_time_atom = ds_atom['time'].values[-1]
     end_time_atom = end_time_atom + (end_time_atom - end_time_atom.astype('datetime64[M]'))
@@ -88,61 +99,4 @@ def read_model_data(ds_atom):
                                                           ds[[mo_var[-2]]].sel(
                                                               time=slice(start_time_atom, end_time_atom)))
 
-    # ratio = (dict_model_obs_data[exper_id[1]][mo_var[1]] /
-    #          dict_model_obs_data[exper_id[0]][mo_var[0]])
-    # dict_model_obs_data['ratio_MOA_MOA_OC'] = ratio.to_dataset(name=mo_var[-1])
-    # print(dict_model_obs_data['ratio_MOA_MOA_OC'].max().values, dict_model_obs_data['ratio_MOA_MOA_OC'].min().values)
-    print(len(dict_model_obs_data))
     return dict_model_obs_data
-
-
-def sel_time(C, month):
-    C_ti = C.where(C.time.dt.month == month, drop=True)
-    return C_ti.mean(dim='time', skipna=True).mean(dim='plev', skipna=True)
-
-
-def read_model_moa_oa():
-    exper = global_vars.experiments
-
-    path_arctic = f'{global_vars.p_model}{exper[0]}/'
-    ds_ac3_arctic = xr.open_mfdataset(f'{path_arctic}*_OA_plev.nc',
-                                      concat_dim='time',
-                                      combine='nested',
-                                      preprocess=lambda ds:
-                                      ds[['OA']])
-
-    ds_ac3_arctic_moa = xr.open_mfdataset(f'{path_arctic}*_MOA_plev.nc',
-                                          concat_dim='time',
-                                          combine='nested',
-                                          preprocess=lambda ds:
-                                          ds[['MOA']])
-
-    ds_ac3_arctic = ds_ac3_arctic.where(ds_ac3_arctic['plev'] > 90000, drop=True)
-    ds_ac3_arctic_moa = ds_ac3_arctic_moa.where(ds_ac3_arctic_moa['plev'] > 90000, drop=True)
-
-    yr_list = ds_ac3_arctic.time.dt.year.values
-    years = [min(yr_list), max(yr_list)]
-    months = np.arange(1, 13)
-
-    oa_list = []
-    moa_list = []
-
-    for m in months:
-        oa_list.append(sel_time(ds_ac3_arctic, m).compute())
-        moa_list.append(sel_time(ds_ac3_arctic_moa, m).compute())
-
-    ds_ac3_arctic_monthly = xr.concat(oa_list, dim='time')
-    ds_ac3_arctic_moa_monthly = xr.concat(moa_list, dim='time')
-
-    ratio = ds_ac3_arctic_moa_monthly.rename({'MOA': 'VAR'}) / ds_ac3_arctic_monthly.rename({'OA': 'VAR'})
-
-    print(ratio, '\n', ratio.min(), ratio.max())
-
-    lon = ds_ac3_arctic.lon
-    lat = ds_ac3_arctic.lat
-
-    plot_model.plot_3_pannel([ratio['VAR'].isel(time=4),
-                              ratio['VAR'].isel(time=7),
-                              ratio['VAR'].isel(time=10)],
-                             ['4', '7', '10'],
-                             lon, lat, years)

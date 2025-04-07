@@ -9,37 +9,9 @@ import matplotlib.ticker as ticker
 import global_vars
 import statistics_atom
 
-font = 12
-def plot_multiplot(da_stat, da_map):
-    fig = plt.figure(constrained_layout=True, figsize=(10, 7))
-
-    (subfig1, subfig2) = fig.subfigures(nrows=1, ncols=2)
-    axs = subfig1.subplots(nrows=2, ncols=1, sharex=True)
-    pl = sns.barplot(data=da_stat, x='Regions', y='NMB', hue="Model variables", ax=axs[0])
-    sns.barplot(data=da_stat, x='Regions', y='Pearson Coef.', hue="Model variables", ax=axs[1])
-    axs[0].legend_.remove()
-    axs[1].legend_.remove()
-    pl.legend(loc='upper center', bbox_to_anchor=(0.5, 1.4), ncol=3)
-
-    ax = subfig2.subplots(nrows=1, ncols=1, sharex=True,
-                          subplot_kw={'projection': ccrs.PlateCarree(central_longitude=180)})
-    orig_cmap = plt.get_cmap('jet')
-    colors = orig_cmap(np.linspace(0.1, 1, 14))
-    cmap = mcolors.LinearSegmentedColormap.from_list("mycmap", colors)
-    print(da_map['moa_oc_ratio'])
-    im = ax.scatter(da_map['lon'].values,
-                    da_map['lat'].values,
-                    c=da_map['moa_oc_ratio'].values * 100,
-                    vmax=50,
-                    cmap=cmap, transform=ccrs.PlateCarree())
-    cbar = subfig2.colorbar(im, orientation="horizontal", extend='max')  # ,cax = cbar_ax
-    cbar.ax.tick_params(labelsize=12)
-    cbar.set_label(label='$MOA/(MOA+OC)$', fontsize=12, weight='bold')
-    ax.coastlines()
-    plt.savefig(f'plots/Stat_regions_bar_map.png')
-
-
+font = 10
 def each_panel_fig(ax, data, var_na, lims, tick_space, title, top_pannel=False):
+    """ Create bar plots of statistics """
     pl = sns.barplot(data=data,
                      x='Regions',
                      y=var_na,
@@ -103,6 +75,7 @@ def each_panel_fig(ax, data, var_na, lims, tick_space, title, top_pannel=False):
 
 
 def set_log_ax(axis, x, y, style):
+    """ Adding diagonal lines in logarithmic axis """
     axis.loglog(x, y,
               color="black",
               linestyle=style,
@@ -110,11 +83,13 @@ def set_log_ax(axis, x, y, style):
               linewidth=0.5)
 
 def setbox_pos(axs, x):
+    """ Accommodate subfigures """
     box = axs.get_position()
     axs.set_position([box.x0+x, box.y0 + box.height * 0.1+0.02,
                          box.width, box.height * 0.9])
 
 def scatter_plot(data_new, ax, parameter, title, var, right_panel=False):
+    """ Used to create a scatter plot per panel """
     color_reg = ['y', 'r', 'lightgreen'] #, 'g', 'm', 'k'
     pl = sns.scatterplot(data=data_new,
                          x="Observation",
@@ -171,6 +146,9 @@ def scatter_plot(data_new, ax, parameter, title, var, right_panel=False):
     return pl
 
 def create_scatter_plots(axsLeft, data_total, experiments):
+    """Creates scatter plot for the SPMOAoff and SPMOAon experiments of the measured
+    Organic Aerosol in ATom aircraft campaign in contrast to modelled organic carbon (OC)
+    or OC+PMOA for each experiment, respectively """
     indices = [r'$\bf{(a)}$', r'$\bf{(b)}$']
     var = ['OC', 'PMOA+OC']
     left_panel_list = [False, True]
@@ -249,13 +227,15 @@ if __name__ == '__main__':
 
 
 ######################################################################
-    fig, axsLeft = plt.subplots(1,2, figsize=(9, 5))
+    # Plot used for paper
+    fig, axsLeft = plt.subplots(1,2, figsize=(7, 5))
     subfigs = [fig]
     create_scatter_plots(axsLeft, data_total, experiments) # Scatter plots for both experiments
-    plt.savefig(f'plots/scatter_bar_plot_regions.png', dpi=300)
+    plt.savefig(f'plots/scatter_plot_regions.png', dpi=300)
     plt.close()
 
-    # Create scatter and barplot together
+ ######################################################################
+# Create scatter and barplot together for Thesis
     fig = plt.figure(layout='constrained',
                      figsize=(12, 6))
     subfigs = fig.subfigures(1, 2,
@@ -293,4 +273,5 @@ if __name__ == '__main__':
     for ax in axsRight:
         setbox_pos(ax, 0)
 
-    plt.show()
+    plt.savefig(f'plots/scatter_bar_plot_regions.png', dpi=300)
+    plt.close()
