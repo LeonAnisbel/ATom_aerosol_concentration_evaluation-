@@ -9,7 +9,7 @@ import matplotlib.ticker as ticker
 import global_vars
 import statistics_atom
 
-font = 10
+font = 12
 def each_panel_fig(ax, data, var_na, lims, tick_space, title, top_pannel=False):
     """ Create bar plots of statistics """
     pl = sns.barplot(data=data,
@@ -103,9 +103,9 @@ def scatter_plot(data_new, ax, parameter, title, var, right_panel=False):
     yli_min = 10 ** -5
     ax.set_ylim((yli_min, 10 ** 0))
     ax.set_xlim((yli_min, 10 ** 0))
-    ax.set_xlabel('Observation OA (${\mu}$g m$^{-3}$)',
+    ax.set_xlabel('Observation OA (µg m$^{-3}$)',
                   fontsize=font)
-    ax.set_ylabel(f'Model {var} ' +  '(${\mu}$g m$^{-3}$)',
+    ax.set_ylabel(f'Model {var} ' +  '(µg m$^{-3}$)',
                   fontsize=font)
 
     k = 10
@@ -254,7 +254,7 @@ if __name__ == '__main__':
     #                    top_pannel=True)
     pl = each_panel_fig(axsRight[0],
                         data_total,
-                        'MB\n(${\mu}$g m$^{-3}$)',
+                        'MB\n(µg m$^{-3}$)',
                         [-0.1, 0.1],
                         0.05,
                         r'$\bf{(c)}$')

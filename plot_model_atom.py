@@ -29,7 +29,7 @@ def diff_plot(c_echam_txy, c_atom, ds_atom_vs_daily, na):
     ax.coastlines()
     cbar = fig.colorbar(map_plot)
     ax.set_title(
-        f'{na}_$c_\mathrm{{{var}}}$$_\mathrm{{,ECHAM}} - c_\mathrm{{{var}}}$$_\mathrm{{,ATom}}$ in $\mu g m^{-3}$')
+        f'{na}_$c_\mathrm{{{var}}}$$_\mathrm{{,ECHAM}} - c_\mathrm{{{var}}}$$_\mathrm{{,ATom}}$ in µg m$^{-3}$')
 
     # add grid lines
     gl = ax.gridlines(draw_labels=True,
@@ -147,7 +147,7 @@ def plot_one_pannel(c_echam, c_atom, ds_atom_vs_daily):
         fig_na = f'Daily concentration \n \n'
         plot_scatter_improve(ax, c_atom, c_echam_txy, [fig_na,stat], std_obs)
         ax.set_ylabel(f'Model {mo_var_title} ({units})', fontsize='16')
-        ax.set_xlabel(f'ATom {at_var}'+ '(${\mu}$g s/m3)', fontsize='16')
+        ax.set_xlabel(f'ATom {at_var}'+ '(µg m$^{-3}$)', fontsize='16')
         plt.tight_layout()
 
         plt.savefig(f'{global_vars.plot_dir}{na}_{mo_var_title}_global_single_plot.png', dpi=300)
@@ -249,7 +249,7 @@ def plot_vert_profile(alt, atom, model, ex, na_region):
     ax.legend()
     ax.set_ylim([0, 1000])
     ax.set_ylabel('Altitude (m)')
-    ax.set_xlabel('Concentration ($\mu gs m^{-3}$)')
+    ax.set_xlabel('Concentration (µg m$^{-3}$)')
     plt.savefig(f'{global_vars.plot_dir}{ex}_{na_region}_vert_profile.png', dpi=300)
 
 

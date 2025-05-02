@@ -15,5 +15,5 @@ exp_id = ['ac3_arctic_OA', 'echam_base']
 
 atom_var = 'OA_PM1_AMS'#'SeaSaltMass_PALMS'#
 atom_plot_varna = 'OA'#'SS'##
-data_units = '${\mu}$g m$^{-3}$)'
-unit_atom = '${\mu}$g m$^{-3}$'
+data_units = 'µg m$^{-3}$'
+unit_atom = 'µg m$^{-3}$'
