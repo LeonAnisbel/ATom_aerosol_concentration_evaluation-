@@ -7,8 +7,8 @@ import pandas as pd
 def get_daily_nonull(ds_atom_vs, new_keys):
     """
     Calculate daily average for observations
-    :param ds_atom_vs:
-    :param new_keys:
+    :param ds_atom_vs: dataset with ATom data
+    :param new_keys: new keys names
     :return: dictionary, observation values, daily average dataframe
     """
 
@@ -30,6 +30,8 @@ def get_daily_nonull(ds_atom_vs, new_keys):
 def create_df(reg_data_stat):
     """
     Create pickle file to save the statistical indices, model and observation values
+    :param reg_data_stat: dictionary with model and ATom data per experiment and region
+    :return: None
     """
     file_name = './stat_exp_regions.pkl'
     try:
@@ -49,7 +51,6 @@ def create_df(reg_data_stat):
             exp_keys_2_dataframe.append(i)
             reg_keys_2_dataframe.append(r)
             for v_id, v in enumerate(reg_data_stat[i][r].keys()):
-                print(v)
                 vars_2_dataframe[v_id].append(reg_data_stat[i][r][v])
 
     da = {'Experiments': exp_keys_2_dataframe,

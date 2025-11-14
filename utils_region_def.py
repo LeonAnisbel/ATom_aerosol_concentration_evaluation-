@@ -8,9 +8,11 @@ import pandas as pd
 # ### Defining regions
 
 def find_region(var_set, cond, dicc, sub_na):
-    """ This function is used to select and filter certain regions according to the conditions variable (cond).
+    """
+    This function is used to select and filter certain regions according to the conditions variable (cond).
     var_set is the list of variables, dicc is the dictionary containing the regions of key argument sub_na
-    Returns the dictionary variable (dicc) with the data filtered to meet each condition"""
+    :return : dictionary variable (dicc) with the data filtered to meet each condition
+    """
     variables = []
     for i, v in enumerate(var_set):
         if len(cond) <= 1:
@@ -31,6 +33,7 @@ def find_region(var_set, cond, dicc, sub_na):
 
 def get_region_dict(ds_atom):
     """
+    Creates a dictionary containing the ATom data per regions as key arguments
     :param ds_atom: ATom data
     :return: Dictionary after region classification
     """
@@ -58,7 +61,13 @@ def get_region_dict(ds_atom):
 
 
 def define_ds(atom, echam, tt):
-    """Defines a dataset"""
+    """
+    Defines a dataset with ATom and model data
+    :var atom: ATom data
+    :var echam: model data
+    :var tt: time data
+    :return: dataset with ATom and model data with time as coordinate
+    """
     ds = xr.Dataset(
         {"echam_data": ("time", echam),
          "atom_data": ("time", atom)},
@@ -67,9 +76,15 @@ def define_ds(atom, echam, tt):
 
 
 def get_region_dict_model_atom(ds_atom_vs, new_keys):
-    """This function creates and returns a dictionary with both ATom and Model values grouped per regions"""
+    """
+    This function creates and returns a dictionary with both ATom and Model values grouped per regions
+    :param ds_atom_vs: ATom data
+    :param new_keys: new keys names
+    :return: dictionary with ATom and Model values grouped per regions
+    """
     at_var = global_vars.atom_var
-    ds_atom_vs_notnan = ds_atom_vs.where(ds_atom_vs[at_var].compute().notnull(), drop=True)
+    ds_atom_vs_notnan = ds_atom_vs.where(ds_atom_vs[at_var].compute().notnull(),
+                                         drop=True)
     ds_atom_vs_notnan['time'] = ds_atom_vs_notnan.time.dt.ceil(
         '1D')
 
@@ -89,11 +104,13 @@ def get_region_dict_model_atom(ds_atom_vs, new_keys):
 
     conditions = region_cond.get_cond_list(lat, lon)
 
+    #create empty dictionary
     for ex in list(reg_data.keys()):
         for na in reg_data[ex].keys():
             reg_data[ex][na] = region_cond.subkeys
     #         reg_data_ds[ex][na] = region_cond.subkeys
 
+    #group data per experiment and region
     for ex_id, ex in enumerate(list(da_model_dicc.keys())):
         print(ex)
         tot_lon, tot_lat = [], []
@@ -117,9 +134,9 @@ def get_region_dict_model_atom(ds_atom_vs, new_keys):
         for ll in ratio:
             tot_ratio.append(ll.values)
 
-    print(tot_ratio)
     da_df = {"moa_oc_ratio": tot_ratio,
-             "lat": tot_lat, "lon": tot_lon}
+             "lat": tot_lat,
+             "lon": tot_lon}
     ds_ratio = pd.DataFrame(data=da_df)
     ds_ratio.to_pickle('./moa_moa_oc_ratio.pkl')
 

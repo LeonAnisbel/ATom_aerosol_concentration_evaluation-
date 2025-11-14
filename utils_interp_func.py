@@ -13,9 +13,11 @@ def find_nearest(atom_val, echam_list):
     return m, diff.index(m)
 
 
-# interpolates a variable to lat,lon and plev (x,y,z) using cubic method
 def interpolation(ds, x, y, z):
-    """Performs linear interpolation and returns interpolated value"""
+    """
+    Performs linear interpolation and returns interpolated value od dataset for specific x, y, z location
+    :return : interpolated value
+    """
     int_val = ds.interp(lon=x, lat=y, plev=z, method="linear")
     return int_val.values
 
@@ -23,8 +25,8 @@ def interpolation(ds, x, y, z):
 def get_model_ds_interp(ds_atom, dict_model_obs_data):
     """
     Interpolate model values to observation location and dates for every experiment
-    :param ds_atom:
-    :param dict_model_obs_data:
+    :param ds_atom: ATom dataset
+    :param dict_model_obs_data: dictionary with model data (as dataset) per experiment
     :return: ds_atom_vs: dataframe with interpolated values per experiment,
              new_keys: experiment names
     """

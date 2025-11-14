@@ -10,6 +10,14 @@ import statistics_atom
 
 
 def diff_plot(c_echam_txy, c_atom, ds_atom_vs_daily, na):
+    """
+    Creates figure with the absolute difference map of ATom values and model quantities of organic aerosol concentration
+    :var c_echam_txy: model values
+    :var c_atom: ATom data
+    :var ds_atom_vs_daily: dataset with lat and lon values
+    :param na: region name
+    :return: None
+    """
     var = global_vars.model_var
     diff_abs = c_echam_txy - c_atom
 
@@ -39,10 +47,20 @@ def diff_plot(c_echam_txy, c_atom, ds_atom_vs_daily, na):
     gl.right_labels = False
 
     var_na = global_vars.atom_plot_varna
-    plt.savefig(f'{global_vars.plot_dir}{na}_diff_abs_{var_na}.pdf', bbox_inches='tight')
+    plt.savefig(f'{global_vars.plot_dir}{na}_diff_abs_{var_na}.pdf',
+                bbox_inches='tight')
 
 
 def scatter_plot(c_echam_txy, c_atom, statistical_quantities, exp):
+    """
+    Plots the data of ATom values against model values of organic aerosol concentration
+    :var c_echam_txy: model values
+    :var c_atom: ATom data
+    :var ds_atom_vs_daily: dataset with lat and lon values
+    :param statistical_quantities: statistical quantities
+    :param exp: experiment name
+    :return: None
+    """
     var = global_vars.model_var
     units = global_vars.data_units
 
@@ -55,7 +73,6 @@ def scatter_plot(c_echam_txy, c_atom, statistical_quantities, exp):
                     markersize=4,
                     ls='',
                     zorder=2)
-    #ax_scatter.set_aspect(aspect=1)
 
     ax_scatter.set_xlabel(f'$c_\mathrm{{{var}}}$$_\mathrm{{,ATom}}$ ({units})')
     ax_scatter.set_ylabel(f'$c_\mathrm{{{var}}}$$_\mathrm{{,ECHAM}}$ ({units})')
@@ -71,12 +88,7 @@ def scatter_plot(c_echam_txy, c_atom, statistical_quantities, exp):
     ax_scatter.plot(x, y,
                     label=f'linear regression\ny = {linreg_coeffs[1]:.2f} x + {linreg_coeffs[0]:.2f}',
                     zorder=3)  # draw regression line
-    # x_eq = np.array([max(c_echam_txy.min(),
-    #                      c_atom.min()),
-    #                  min(c_echam_txy.max(),
-    #                      c_atom.max())])
-    # ax_scatter.plot(x_eq, x_eq,
-    #                 label='y = x', zorder=1)
+
     lims = [
         np.min([ax_scatter.get_xlim(), ax_scatter.get_ylim()]),  # min of both axes
         np.max([ax_scatter.get_xlim(), ax_scatter.get_ylim()]),  # max of both axes
@@ -93,39 +105,56 @@ def scatter_plot(c_echam_txy, c_atom, statistical_quantities, exp):
 
 
 def plot_scatter_improve(axs, atom, model, title, std_obs):
-    axs.errorbar(atom, model, xerr=std_obs, fmt='o', color="grey", alpha=0.8)
-    axs.scatter(atom, model, color='blue')
-    axs.set_title(title[0], fontsize='16', loc='right')
-    axs.set_title(title[1], fontsize='16', loc='left')
+    """
+    Plots the data of ATom values against model values of organic aerosol concentration
+    :var axs: matplotlib axes
+    :var atom: ATom data
+    :var model: model data
+    :param title: subplot title
+    :param std_obs: std of observation data
+    :return: None
+    """
+    axs.errorbar(atom,
+                 model,
+                 xerr=std_obs,
+                 fmt='o',
+                 color="grey",
+                 alpha=0.8)
+    axs.scatter(atom,
+                model,
+                color='blue')
+    axs.set_title(title[0],
+                  fontsize='16',
+                  loc='right')
+    axs.set_title(title[1],
+                  fontsize='16',
+                  loc='left')
 
     linreg_coeffs = np.polynomial.Polynomial.fit(atom, model,
                                                  deg=1).convert().coef  # perform linear regression, get intercept and slope
-    x = np.linspace(atom.min(), atom.max(), num=2)  # define x-values of regression line
+    x = np.linspace(atom.min(),
+                    atom.max(),
+                    num=2)  # define x-values of regression line
     y = linreg_coeffs[0] + linreg_coeffs[1] * x  # define y-values of regression line
-    axs.plot(x, y,color = 'darkred',
-             label=f'linear regression\ny = {linreg_coeffs[1]:.2f} x + {linreg_coeffs[0]:.2f}', zorder=3)
+    axs.plot(x, y,
+             color = 'darkred',
+             label=f'linear regression\ny = {linreg_coeffs[1]:.2f} x + {linreg_coeffs[0]:.2f}',
+             zorder=3)
 
-
-    at_max = atom.max()
-    mo_max = model.max()
-    max_list = [at_max, mo_max]
-    # axs.set_xlim([0, max(max_list)])
-    # axs.set_ylim([0, max(max_list)])
-
-    # x_eq = np.array([max(model.min(), atom.min()),
-    #                  min(model.max(), atom.max())])
-    # axs.plot(x_eq, x_eq, label='y = x', zorder=1)
-    lims = [
-        np.min([axs.get_xlim(), axs.get_ylim()]),  # min of both axes
-        np.max([axs.get_xlim(), axs.get_ylim()]),  # max of both axes
-    ]
-    # axs.plot(lims, lims, 'k--', alpha=0.75, zorder=0, label='1:1 line')
     axs.legend()
     axs.grid(linewidth=0.5)
-    axs.tick_params(axis='both', labelsize='14')
+    axs.tick_params(axis='both',
+                    labelsize='14')
 
 
 def plot_one_pannel(c_echam, c_atom, ds_atom_vs_daily):
+    """
+    Create 1-panel plot with ATom data versus model data
+    :var c_echam: model values
+    :var c_atom: ATom data
+    :var ds_atom_vs_daily: dataset with lat and lon values
+    :return: None
+    """
     mo_var = global_vars.model_var
     at_var = global_vars.atom_plot_varna
 
@@ -136,34 +165,53 @@ def plot_one_pannel(c_echam, c_atom, ds_atom_vs_daily):
         if mo_var[idx] == 'OA':
             mo_var_title = 'MOA + OC'
         c_echam_txy = c_echam[na]
-        diff_plot(c_echam_txy, c_atom, ds_atom_vs_daily, na)
+        diff_plot(c_echam_txy,
+                  c_atom,
+                  ds_atom_vs_daily,
+                  na)
         std_model, std_obs, RMSE, mean_bias, normalized_mean_bias, pearsons_coeff, pval, R2, statistical_quantities = (
             statistics.get_statistics(
             c_atom, c_echam_txy))
         scatter_plot(c_atom, c_atom, statistical_quantities, na)
 
-        stat = f'[RMSE: {RMSE:.2f}, pval:{pval:.2f}, \n NMB:{normalized_mean_bias:.2f}, R: {pearsons_coeff:.2f}]'
-        fig, ax = plt.subplots(1, 1, figsize=(8, 6))
+        stat = (f'[RMSE: {RMSE:.2f}, '
+                f'pval:{pval:.2f}, '
+                f'\n NMB:{normalized_mean_bias:.2f}, '
+                f'R: {pearsons_coeff:.2f}]')
+        fig, ax = plt.subplots(1,
+                               1,
+                               figsize=(8, 6))
         fig_na = f'Daily concentration \n \n'
-        plot_scatter_improve(ax, c_atom, c_echam_txy, [fig_na,stat], std_obs)
-        ax.set_ylabel(f'Model {mo_var_title} ({units})', fontsize='16')
-        ax.set_xlabel(f'ATom {at_var}'+ '(µg m$^{-3}$)', fontsize='16')
+        plot_scatter_improve(ax,
+                             c_atom,
+                             c_echam_txy,
+                             [fig_na,stat],
+                             std_obs)
+        ax.set_ylabel(f'Model {mo_var_title} ({units})',
+                      fontsize='16')
+        ax.set_xlabel(f'ATom {at_var}'+ '(µg m$^{-3}$)',
+                      fontsize='16')
         plt.tight_layout()
 
-        plt.savefig(f'{global_vars.plot_dir}{na}_{mo_var_title}_global_single_plot.png', dpi=300)
+        plt.savefig(f'{global_vars.plot_dir}{na}_{mo_var_title}_global_single_plot.png',
+                    dpi=300)
 
 
 def plot_multipannel(reg_data):
+    """
+    Create 6-panel plot with ATom data versus model data across and experiments
+    :var reg_data: dictionary with ATom and interpolated model values for all experiments and regions
+    :var c_atom: ATom data
+    :return: dictionary with statistics per region
+    """
     at_var = global_vars.atom_plot_varna
     mo_var = global_vars.model_var
-    units = global_vars.data_units
     fig_idx = [r'$\bf{(a)}$', r'$\bf{(b)}$',
             r'$\bf{(c)}$', r'$\bf{(d)}$',
             r'$\bf{(e)}$', r'$\bf{(f)}$']
 
     reg_data_stat = dict((name, {})
                        for name in list(reg_data.keys()))
-    reg_data_4_taylor_mod_list = []
 
     for idx, ex in enumerate(list(reg_data.keys())):
         print('plotting', ex)
@@ -172,10 +220,10 @@ def plot_multipannel(reg_data):
             mo_var_title = 'PMOA + OC'
 
         plt.close()
-        fig, ax = plt.subplots(2, 3, figsize=(15, 10))
+        fig, ax = plt.subplots(2, 3,
+                               figsize=(15, 10))
         axes = ax.flatten()
-        fig_na = f'Daily concentration'
-        # fig.suptitle(f'{fig_na}', fontsize='20')
+
         for i, na in enumerate(reg_data[ex].keys()):
             reg_data_stat[ex][na] = {}
             print(na)
@@ -195,20 +243,20 @@ def plot_multipannel(reg_data):
 
                 std_daily_obs.append(np.nanstd(np.array(std_obs_list)))
 
-            ds_atom_vs_daily['std_daily_observ'] = (['time'], std_daily_obs)
+            ds_atom_vs_daily['std_daily_observ'] = (['time'],
+                                                    std_daily_obs)
             ds_atom_vs_daily_filter = ds_atom_vs_daily#.where(ds_atom_vs_daily['echam_data'] < 0.8, drop=True)
 
             c_echam_txy = ds_atom_vs_daily_filter['echam_data']
             c_atom = ds_atom_vs_daily_filter['atom_data']
 
 
-            print(ds_atom_vs_daily_filter['time'], '\n', c_echam_txy)
-
-            print(ds_atom_vs_daily_filter['time'], '\n', c_atom)
-
-            std_model, std_obs, RMSE, mean_bias, normalized_mean_bias, pearsons_coeff, pval, R2, _ = statistics.get_statistics(
-                c_atom, c_echam_txy)
-            stat = f'[RMSE: {RMSE:.2f}, pval: {pval:.3f}, \n NMB:{normalized_mean_bias:.2f}, R: {pearsons_coeff:.2f}]'
+            std_model, std_obs, RMSE, mean_bias, normalized_mean_bias, pearsons_coeff, pval, R2, _ = (
+                statistics.get_statistics(c_atom, c_echam_txy))
+            stat = (f'[RMSE: {RMSE:.2f}, '
+                    f'pval: {pval:.3f}, '
+                    f'\n NMB:{normalized_mean_bias:.2f},'
+                    f' R: {pearsons_coeff:.2f}]')
 
             reg_data_stat[ex][na]['R'] = pearsons_coeff
             reg_data_stat[ex][na]['bias'] = mean_bias
@@ -227,30 +275,44 @@ def plot_multipannel(reg_data):
 
         ylab = f'Model {mo_var_title} ({global_vars.unit_atom})'
         xlab = f'Observation {at_var} ({global_vars.unit_atom})'
-        axes[0].set_ylabel(ylab, fontsize='16')
-        axes[3].set_ylabel(ylab, fontsize='16')
+        axes[0].set_ylabel(ylab,
+                           fontsize='16')
+        axes[3].set_ylabel(ylab,
+                           fontsize='16')
 
-        axes[3].set_xlabel(xlab, fontsize='16')
-        axes[4].set_xlabel(xlab, fontsize='16')
-        axes[5].set_xlabel(xlab, fontsize='16')
-        # axes[7].set_xlabel(f'ATom {at_var}', fontsize='16')
+        axes[3].set_xlabel(xlab,
+                           fontsize='16')
+        axes[4].set_xlabel(xlab,
+                           fontsize='16')
+        axes[5].set_xlabel(xlab,
+                           fontsize='16')
 
         plt.tight_layout()
-        plt.savefig(f'{global_vars.plot_dir}{ex}_{mo_var_title}_model_atom_final.png', dpi=300)
+        plt.savefig(f'{global_vars.plot_dir}{ex}_{mo_var_title}_model_atom_final.png',
+                    dpi=300)
         plt.close()
 
     return reg_data_stat
 
 
 def plot_vert_profile(alt, atom, model, ex, na_region):
-    fig, ax = plt.subplots(1, 1, figsize=(8, 6))
-    ax.scatter(atom, alt, color='blue', label='ATom OA')
-    ax.scatter(model, alt, color='red', label='Model')
+    fig, ax = plt.subplots(1,
+                           1,
+                           figsize=(8, 6))
+    ax.scatter(atom,
+               alt,
+               color='blue',
+               label='ATom OA')
+    ax.scatter(model,
+               alt,
+               color='red',
+               label='Model')
     ax.legend()
     ax.set_ylim([0, 1000])
     ax.set_ylabel('Altitude (m)')
     ax.set_xlabel('Concentration (µg m$^{-3}$)')
-    plt.savefig(f'{global_vars.plot_dir}{ex}_{na_region}_vert_profile.png', dpi=300)
+    plt.savefig(f'{global_vars.plot_dir}{ex}_{na_region}_vert_profile.png',
+                dpi=300)
 
 
 

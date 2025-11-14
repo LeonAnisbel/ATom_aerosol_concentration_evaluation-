@@ -5,8 +5,11 @@ import plot_model
 
 
 def read_atom_data(path_atom_meta):
-    """ This function reads in the ATom in situ aircraft data from netcdf files
-    Returns: all relevant variables needed from the dataset"""
+    """
+    This function reads in the ATom in situ aircraft data from netcdf files
+    :param path_atom_meta: ATom data directory
+    :return : all relevant variables needed from the dataset
+    """
     ds_atom_palms = xr.open_mfdataset(path_atom_meta,
                                       group='PALMS-PartType-Mass',
                                       concat_dim='time',
@@ -39,7 +42,7 @@ def read_atom_data(path_atom_meta):
 def ds_atom_data_sel_filter():
     """
     Selecting only atom levels under 1 km height and concentrations smaller than 0.2 ug/m3
-    :return: dataframe with filtered ATom data
+    :return: dataset with filtered ATom data
     """
 
     at_var = global_vars.atom_var
@@ -67,7 +70,8 @@ def ds_atom_data_sel_filter():
 def read_model_data(ds_atom):
     """
     Reading model data for each experiment, only loads the time steps where ATom data exists
-    :return: dataframe with model data
+    :var ds_atom: ATom data as dataset
+    :return: dictionary with model data (as dataset) per experiment
     """
     start_time_atom = ds_atom['time'].values[0]
     end_time_atom = ds_atom['time'].values[-1]
